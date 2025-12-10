@@ -14,7 +14,7 @@ const nextFont = Inter({
   display: "fallback",
   adjustFontFallback: true,
   preload: true,
-  weight: ["400", "500", "700"],
+  weight: ["400", "500", "700", "800"],
 })
 
 export const metadata: Metadata = {

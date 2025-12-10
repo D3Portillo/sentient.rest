@@ -1,3 +1,5 @@
+"use client"
+
 import { Fragment } from "react/jsx-runtime"
 
 import { TbArrowDownLeft, TbArrowUpRight } from "react-icons/tb"
@@ -7,16 +9,57 @@ import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 
 import { FaArrowsRotate } from "react-icons/fa6"
+import { useWorldAuth } from "@radish-la/world-auth"
+import { useEffect, useState } from "react"
+import AddressBlock from "./components/AddressBlock"
+import { useWorldProfile } from "./hooks/world"
+import { beautifyAddress } from "./lib/utils"
 
 export default function Home() {
+  const [isReady, setIsReady] = useState(false)
+
+  const { address, signIn } = useWorldAuth()
+  const { profile } = useWorldProfile(address)
+
+  useEffect(() => {
+    requestAnimationFrame(() => {
+      setIsReady(true)
+    })
+  }, [])
+
+  // Black screen while loading (from world-auth)
+  if (!isReady) return null
+
+  if (!address)
+    return (
+      <main className="flex text-center flex-col justify-center items-center h-dvh">
+        <h1 className="font-semibold text-xl">Sentient Wallet</h1>
+
+        <p className="w-full max-w-xs">
+          Connect your wallet to create or access your Sentient Wallet account.
+        </p>
+
+        <button
+          onClick={signIn}
+          className="mt-4 font-semibold bg-sw-yellow text-black flex items-center justify-center h-10 px-4 rounded-lg"
+        >
+          Connect Wallet
+        </button>
+      </main>
+    )
+
   return (
     <Fragment>
       <main className="max-w-md h-dvh overflow-hidden mx-auto flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-between p-4">
           <div className="bg-white/10 backdrop-blur-sm rounded-full pl-1.5 py-1.5 pr-4 flex items-center gap-2">
-            <figure className="size-6 rounded-full bg-linear-to-br from-sw-green to-blue-500" />
-            <span className="text-sm font-medium">deca.15</span>
+            <AddressBlock address={address} />
+            <span className="text-sm font-semibold">
+              {profile?.username
+                ? profile.username
+                : beautifyAddress(address, 3, "")}
+            </span>
           </div>
 
           <button className="p-1">
@@ -111,7 +154,7 @@ export default function Home() {
 
             <button className="grid place-items-center gap-1">
               <figure className="size-6 grid place-items-center place-content-center">
-                <FaCoins className="text-2xl scale-105" />
+                <FaCoins className="text-2xl" />
               </figure>
               <span className="text-xs font-medium text-white/60">Assets</span>
             </button>
