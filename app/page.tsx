@@ -3,8 +3,9 @@
 import { Fragment } from "react/jsx-runtime"
 
 import { TbArrowDownLeft, TbArrowUpRight } from "react-icons/tb"
-import { FaCoins, FaArrowUp } from "react-icons/fa"
-import { IoMdMenu } from "react-icons/io"
+import { FaCoins, FaArrowUp, FaArrowRight } from "react-icons/fa"
+import { IoMdArrowForward, IoMdMenu } from "react-icons/io"
+import { MdArrowForward } from "react-icons/md"
 import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 
@@ -14,6 +15,7 @@ import { useEffect, useState } from "react"
 import AddressBlock from "./components/AddressBlock"
 import { useWorldProfile } from "./hooks/world"
 import { beautifyAddress } from "./lib/utils"
+import { Logo } from "./components/icons"
 
 export default function Home() {
   const [isReady, setIsReady] = useState(false)
@@ -32,18 +34,21 @@ export default function Home() {
 
   if (!address)
     return (
-      <main className="flex text-center flex-col justify-center items-center h-dvh">
-        <h1 className="font-semibold text-xl">Sentient Wallet</h1>
+      <main className="flex p-4 text-center flex-col justify-center items-center h-dvh">
+        <Logo className="size-16" />
 
-        <p className="w-full max-w-xs">
-          Connect your wallet to create or access your Sentient Wallet account.
+        <h1 className="mt-4 font-semibold text-lg">Sentient Wallet</h1>
+
+        <p className="w-full text-sm max-w-72">
+          Let's create or connect your wallet to get you started.
         </p>
 
         <button
           onClick={signIn}
-          className="mt-4 font-semibold bg-sw-yellow text-black flex items-center justify-center h-10 px-4 rounded-lg"
+          className="mt-12 active:scale-98 font-semibold bg-sw-yellow text-black flex gap-4 items-center justify-center h-11 px-5 rounded-lg"
         >
-          Connect Wallet
+          <span>Connect Wallet</span>
+          <FaArrowRight className="scale-105" />
         </button>
       </main>
     )
@@ -53,7 +58,7 @@ export default function Home() {
       <main className="max-w-md h-dvh overflow-hidden mx-auto flex flex-col">
         {/* Header */}
         <header className="flex items-center justify-between p-4">
-          <div className="bg-white/10 backdrop-blur-sm rounded-full pl-1.5 py-1.5 pr-4 flex items-center gap-2">
+          <div className="bg-white/10 border border-white/5 backdrop-blur-sm rounded-full pl-1.5 py-1.5 pr-3 flex items-center gap-2">
             <AddressBlock address={address} />
             <span className="text-sm font-semibold">
               {profile?.username
