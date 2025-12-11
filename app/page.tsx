@@ -9,16 +9,19 @@ import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 import { FaArrowsRotate } from "react-icons/fa6"
 
-import PageSignin from "./PageSignin"
+import PageSignin, { useSentientWallet } from "./PageSignin"
 import PageContainer from "./PageContainer"
 import DialogAddress from "./components/DialogAddress"
 import { isDevEnv } from "./lib/env"
 
 export default function Home() {
   const { isConnected } = useWorldAuth()
+  const { wallet } = useSentientWallet()
 
-  const showConnectState = !isDevEnv() && !isConnected
+  // Show when not conencted or no Sentient wallet created
+  const showConnectState = (!isDevEnv() && !isConnected) || !wallet
   // Black screen while loading (from world-auth)
+
   if (showConnectState) return <PageSignin />
 
   return (
