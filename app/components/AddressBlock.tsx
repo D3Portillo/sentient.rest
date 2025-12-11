@@ -15,7 +15,10 @@ export default function AddressBlock({
   return (
     <figure
       style={{
-        backgroundImage: `linear-gradient(to bottom right, ${from}, ${to})`,
+        backgroundImage: `
+          radial-gradient(circle at 66% 33%, rgba(255, 255, 255, 0.4), transparent 50%),
+          linear-gradient(to bottom right, ${from}, ${to})
+        `,
       }}
       className={cn("size-6 rounded-full", className)}
     />
