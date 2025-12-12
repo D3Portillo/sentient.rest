@@ -25,5 +25,6 @@ a {
   --spacing-safe-bottom: var(--safe-inset-bottom, 0px);
   --color-sw-green: #20bf55;
   --color-sw-yellow: #ffff11;
+  --color-sw-blue: #357ded;
   --color-sw-red: #ff1315;
 }

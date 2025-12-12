@@ -9,10 +9,12 @@ import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 import { FaArrowsRotate } from "react-icons/fa6"
 
-import PageSignin, { useSentientWallet } from "./PageSignin"
+import { isDevEnv } from "@/lib/env"
+import { useSentientWallet } from "@/lib/wallets"
+
+import PageSignin from "./PageSignin"
 import PageContainer from "./PageContainer"
 import DialogAddress from "./components/DialogAddress"
-import { isDevEnv } from "./lib/env"
 
 export default function Home() {
   const { isConnected } = useWorldAuth()
