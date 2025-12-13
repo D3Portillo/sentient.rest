@@ -3,8 +3,22 @@
 import { useWorldAuth } from "@radish-la/world-auth"
 import { useWorldProfile } from "@/hooks/world"
 import { beautifyAddress } from "@/lib/utils"
+
+import { FaArrowRight } from "react-icons/fa"
+
 import AddressBlock from "./AddressBlock"
 import Dialog from "./Dialog"
+import Button from "./Button"
+
+// Supported deposit chains
+export const DEPOSIT_CHAINS = [
+  { name: "Base", iconImage: "/chains/base.png" },
+  { name: "Worldchain", iconImage: "/chains/world.png" },
+  { name: "Arbitrum", iconImage: "/chains/arbitrum.png" },
+  { name: "Optimism", iconImage: "/chains/optimism.png" },
+  { name: "Fuel", iconImage: "/chains/fuel.png" },
+  { name: "Solana", iconImage: "/chains/solana.png" },
+]
 
 export default function DialogAddress() {
   const { address, signOut } = useWorldAuth()
@@ -19,14 +33,14 @@ export default function DialogAddress() {
       trigger={
         <div
           role="button"
-          className="bg-white/10 border border-white/5 backdrop-blur-sm rounded-full pl-1.5 py-1.5 pr-3 flex items-center gap-2"
+          className="bg-white/10 cursor-pointer border border-white/5 backdrop-blur-sm rounded-full pl-1.5 py-1.5 pr-3 flex items-center gap-2"
         >
           <AddressBlock address={address} />
           <span className="text-sm font-semibold">{USERNAME}</span>
         </div>
       }
     >
-      <div className="flex flex-col items-center gap-3">
+      <div className="flex flex-col items-center gap-4">
         <AddressBlock
           className="size-20 outline outline-white/15"
           address={address}
@@ -35,14 +49,35 @@ export default function DialogAddress() {
           <div className="font-black text-lg">{USERNAME}</div>
         </nav>
 
-        <div className="my-4" />
+        {/* Actions */}
+        <div className="w-full mt-4 grid gap-4">
+          <Button className="bg-white hover:bg-white/95">
+            <span className="grow text-left">Deposit</span>
 
-        <button
-          onClick={signOut}
-          className="h-14 font-semibold w-full rounded-lg bg-white/15 text-white border border-white/15"
-        >
-          Disconnect
-        </button>
+            {/* Overlapping chain logos */}
+            <div className="flex -space-x-2 ml-2">
+              {DEPOSIT_CHAINS.map((chain, idx) => (
+                <figure
+                  key={`chain-${chain.name}`}
+                  className="size-6 rounded-full overflow-hidden bg-black/10 border border-black"
+                  style={{ zIndex: DEPOSIT_CHAINS.length - idx }}
+                >
+                  <img
+                    src={chain.iconImage}
+                    className="size-full object-cover"
+                    alt=""
+                  />
+                </figure>
+              ))}
+            </div>
+
+            <FaArrowRight className="text-lg" />
+          </Button>
+
+          <Button variant="secondary" onClick={signOut}>
+            Disconnect
+          </Button>
+        </div>
       </div>
     </Dialog>
   )

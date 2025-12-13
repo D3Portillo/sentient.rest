@@ -5,6 +5,7 @@ import { Inter } from "next/font/google"
 import { Toaster } from "sonner"
 
 import { AlertProvider } from "@/components/Alert"
+import DrawerWithdraw from "@/components/DrawerWithdraw"
 import SafeInsetProvider from "@/components/SafeInsetProvider"
 import ErudaProvider from "@/components/ErudaProdiver"
 import WorldProvider from "./WorldProvider"
@@ -53,7 +54,10 @@ export default function RootLayout({
 
         <WorldProvider>
           <ErudaProvider>
-            <SafeInsetProvider>{children}</SafeInsetProvider>
+            <SafeInsetProvider>
+              <DrawerWithdraw />
+              {children}
+            </SafeInsetProvider>
           </ErudaProvider>
         </WorldProvider>
       </body>

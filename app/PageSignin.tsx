@@ -7,6 +7,8 @@ import { useWorldAuth } from "@radish-la/world-auth"
 import { MiniKit } from "@worldcoin/minikit-js"
 
 import { decryptPin, encryptPin, useSentientWallet } from "@/lib/wallets"
+import { getDevPk } from "@/app/actions/dev"
+import { isDevEnv } from "@/lib/env"
 
 import { FaArrowRight } from "react-icons/fa"
 import { IoBackspaceSharp, IoShield } from "react-icons/io5"
@@ -24,24 +26,35 @@ interface WalletData {
 }
 
 const atomWallets = atomWithStorage<Record<Address, WalletData | null>>(
-  "sw.stored-wallets",
+  "sw.stored.wallets",
   {}
 )
 
 const getPinSignatureMessage = (address: Address, pin: string) =>
-  `Sentient Wallet Access ― ${
+  `Wallet Access ― ${
     // 18 characters fingerprint, including the "0x"
     beautifyAddress(keccak256(toHex(address + pin)), 9, "")
   }`
 
 export default function PageSignin() {
-  const [pinMode, setPinMode] = useState<"create" | "unlock" | null>("unlock")
+  const [pinMode, setPinMode] = useState<"create" | "unlock" | null>(null)
 
   const { signIn, isConnected, address } = useWorldAuth()
   const { unsafeSetWallet } = useSentientWallet()
 
   const [wallets, setWallets] = useAtom(atomWallets)
   const WALLET = address ? wallets[address] : null
+
+  async function handleSignIn() {
+    if (isDevEnv()) {
+      // Mock wallet for dev environment
+      return unsafeSetWallet(
+        privateKeyToAccount(keccak256(toHex(await getDevPk())))
+      )
+    }
+
+    signIn()
+  }
 
   const handleCreateWallet = async (pin: string) => {
     try {
@@ -157,7 +170,7 @@ export default function PageSignin() {
         Let's connect your wallet to get started with Sentient.
       </p>
 
-      <Button onClick={signIn} className="mt-12">
+      <Button onClick={handleSignIn} className="mt-12">
         <span>Connect Wallet</span>
         <FaArrowRight className="scale-105" />
       </Button>
@@ -217,12 +230,12 @@ function PinInput({
   }
 
   return (
-    <PageContainer className="items-center relative z-1 justify-between pb-8">
+    <PageContainer className="items-center relative z-1 overflow-hidden justify-between pb-8">
       <div className="fixed pointer-events-none inset-0">
         <figure
           className={cn(
-            theme === "yellow" ? "bg-sw-yellow/20" : "bg-sw-blue/60",
-            "size-[min(14rem,50vw)] blur-[10rem] rounded-full absolute -translate-x-1/2 top-12 left-1/2"
+            "size-[min(14rem,50vw)] blur-[10rem] rounded-full absolute -translate-x-1/2 top-12 left-1/2",
+            theme === "yellow" ? "bg-sw-yellow/20" : "bg-sw-blue/60"
           )}
         />
       </div>
@@ -230,10 +243,10 @@ function PinInput({
       <section className="flex relative z-1 text-center flex-col items-center justify-center min-h-[40vh]">
         <figure
           className={cn(
+            "size-20 border-2 rounded-2xl bg-linear-to-br to-white/15 grid place-items-center",
             theme === "yellow"
               ? "from-sw-yellow/20 border-sw-yellow/15"
-              : "from-sw-blue/20 border-sw-blue/20",
-            "size-18 bg-linear-to-br to-white/15 rounded-xl border grid place-items-center"
+              : "from-sw-blue/20 border-sw-blue/20"
           )}
         >
           {icon}
@@ -259,7 +272,7 @@ function PinInput({
 
         <p
           className={cn(
-            "text-red-400 pointer-events-none mt-4 text-xs",
+            "text-red-400 pointer-events-none mt-6 text-xs",
             error || "opacity-0"
           )}
         >
@@ -279,11 +292,12 @@ function PinInput({
             </PadInput>
           ))}
 
-          <div />
+          <PadInput className="border-b-0 pointer-events-none" />
+          <PadInput className="border-b-0" onTap={() => handleNumpadPress(0)}>
+            0
+          </PadInput>
 
-          <PadInput onTap={() => handleNumpadPress(0)}>0</PadInput>
-
-          <PadInput onTap={handleBackspace}>
+          <PadInput className="border-b-0" onTap={handleBackspace}>
             <IoBackspaceSharp className="scale-110" />
           </PadInput>
         </div>
@@ -297,14 +311,14 @@ function PadInput({
   children,
   className,
 }: PropsWithChildren<{
-  onTap: () => void
+  onTap?: () => void
   className?: string
 }>) {
   return (
     <button
       onClick={onTap}
       className={cn(
-        "aspect-square grid place-items-center text-white/90 active:text-white relative z-1 border-white/10 border-r nth-[n+4]:border-t nth-[3n]:border-r-0 active:bg-white/7 text-2xl",
+        "aspect-square grid place-items-center text-white/90 active:text-white relative z-1 border-white/10 border-r border-b nth-[3n]:border-r-0 active:bg-white/7 text-2xl",
         className
       )}
     >

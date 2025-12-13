@@ -10,6 +10,7 @@ import { IoInformationCircleOutline } from "react-icons/io5"
 import { FaArrowsRotate } from "react-icons/fa6"
 
 import { isDevEnv } from "@/lib/env"
+import { useWithdrawModal } from "@/components/DrawerWithdraw"
 import { useSentientWallet } from "@/lib/wallets"
 
 import PageSignin from "./PageSignin"
@@ -17,13 +18,12 @@ import PageContainer from "./PageContainer"
 import DialogAddress from "./components/DialogAddress"
 
 export default function Home() {
+  const { toggle } = useWithdrawModal()
   const { isConnected } = useWorldAuth()
   const { wallet } = useSentientWallet()
 
   // Show when not conencted or no Sentient wallet created
   const showConnectState = (!isDevEnv() && !isConnected) || !wallet
-  // Black screen while loading (from world-auth)
-
   if (showConnectState) return <PageSignin />
 
   return (
@@ -50,7 +50,10 @@ export default function Home() {
 
         {/* Action Buttons */}
         <div className="grid mt-18 grid-cols-4 gap-2 w-full max-w-sm">
-          <button className="bg-sw-yellow text-black backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center">
+          <button
+            onClick={toggle}
+            className="bg-sw-yellow text-black backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center"
+          >
             <figure className="size-9 grid place-items-center">
               <TbArrowUpRight className="text-3xl" />
             </figure>
@@ -84,12 +87,12 @@ export default function Home() {
         {/* Transactions Section */}
         <div className="w-full mt-8 max-w-sm">
           <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-bold">Latest Activity</h2>
+            <h2 className="text-lg font-bold">Latest Activity</h2>
             <button className="text-sm underline">View all</button>
           </div>
 
           {/* Transaction Item */}
-          <button className="flex w-full text-left border border-white/3 items-center gap-4 p-4 rounded-xl bg-white/3 hover:bg-white/6 transition-colors">
+          <button className="flex w-full text-left border border-white/3 items-center gap-4 p-4 rounded-xl bg-white/6 hover:bg-white/8 transition-colors">
             <div className="w-12 h-12 rounded-full bg-sw-red/10 flex items-center justify-center">
               <TbArrowUpRight className="text-sw-red text-2xl" />
             </div>
@@ -97,7 +100,8 @@ export default function Home() {
               <h3 className="text-lg font-semibold">Sent</h3>
               <p className="text-white/60 text-sm">Completed · 10 months</p>
             </div>
-            <div className="text-xl font-semibold">$0.02</div>
+
+            <div className="text-xl px-1 font-semibold">$0.02</div>
           </button>
         </div>
       </section>
@@ -112,7 +116,10 @@ export default function Home() {
             <span className="text-xs font-medium">Home</span>
           </button>
 
-          <button className="flex -top-2 flex-col items-center gap-1 relative">
+          <button
+            onClick={toggle}
+            className="flex -top-2 flex-col items-center gap-1 relative"
+          >
             <div className="size-12 -top-1 bg-sw-yellow text-black rounded-full flex items-center justify-center absolute">
               <FaArrowUp className="text-xl" />
             </div>

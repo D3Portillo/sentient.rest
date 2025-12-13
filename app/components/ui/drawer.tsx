@@ -10,9 +10,7 @@ const DrawerContext = React.createContext<{ modal: boolean }>({ modal: true })
 const Drawer = ({
   shouldScaleBackground = true,
   modal = true,
-  onOpenChange,
   children,
-  open,
   id,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Root> & {
@@ -76,7 +74,7 @@ const DrawerContent = React.forwardRef<
       <DrawerPrimitive.Content
         ref={ref}
         className={cn(
-          "fixed inset-x-0 outline-none bottom-safe-bottom z-51 mt-24 flex h-auto flex-col rounded-t-3xl border-t bg-background",
+          "fixed px-4 inset-x-0 outline-none bottom-safe-bottom z-51 mt-24 flex h-auto flex-col rounded-t-3xl border-t bg-black/90 backdrop-blur-md",
           className
         )}
         {...props}
@@ -117,7 +115,10 @@ const DrawerTitle = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <DrawerPrimitive.Title
     ref={ref}
-    className={cn("text-lg font-black leading-none tracking-tight", className)}
+    className={cn(
+      "text-lg text-white text-center font-black leading-none tracking-tight",
+      className
+    )}
     {...props}
   />
 ))
