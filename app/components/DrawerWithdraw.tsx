@@ -3,7 +3,7 @@
 import { atom, useAtom } from "jotai"
 import { useState } from "react"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
-import { IoChevronDown } from "react-icons/io5"
+import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
 import { DEPOSIT_CHAINS } from "./DialogAddress"
 import Button from "./Button"
 
@@ -18,6 +18,12 @@ export const useWithdrawModal = () => {
 }
 
 const TOKENS = [
+  {
+    symbol: "WLD",
+    name: "Worldcoin",
+    balance: "0.00",
+    iconImage: "/tokens/wld.png",
+  },
   {
     symbol: "USDC",
     name: "USD Coin",
@@ -36,19 +42,12 @@ const TOKENS = [
     balance: "0.00",
     iconImage: "/tokens/eth.png",
   },
-  {
-    symbol: "WLD",
-    name: "Worldcoin",
-    balance: "0.00",
-    iconImage: "/tokens/wld.png",
-  },
 ]
 
 export default function DrawerWithdraw() {
   const { open, setOpen } = useWithdrawModal()
-  const [selectedToken, setSelectedToken] = useState(TOKENS[0])
-  // WLD is default selected
   const [selectedChain, setSelectedChain] = useState(DEPOSIT_CHAINS[1])
+  const [selectedToken, setSelectedToken] = useState(TOKENS[0])
   const [amount, setAmount] = useState("")
 
   return (
@@ -62,24 +61,55 @@ export default function DrawerWithdraw() {
           {/* Token Selection */}
           <div>
             <label className="text-xs text-white/60 mb-2 block">Token</label>
-            <button className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
-                  <img
-                    src={selectedToken.iconImage}
-                    className="size-full object-cover"
-                    alt=""
-                  />
-                </figure>
-                <div className="text-left -space-y-0.5">
-                  <div className="font-semibold">{selectedToken.symbol}</div>
-                  <div className="text-xs text-white/60">
-                    {selectedToken.name}
+            <Select
+              value={selectedToken.symbol}
+              onValueChange={(value) => {
+                const token = TOKENS.find((t) => t.symbol === value)
+                if (token) setSelectedToken(token)
+              }}
+            >
+              <SelectTrigger>
+                <div className="flex items-center gap-3">
+                  <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                    <img
+                      src={selectedToken.iconImage}
+                      className="size-full object-cover"
+                      alt=""
+                    />
+                  </figure>
+                  <div className="text-left -space-y-0.5">
+                    <div className="font-semibold">{selectedToken.symbol}</div>
+                    <div className="text-xs text-white/60">
+                      {selectedToken.name}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <IoChevronDown className="text-white/60" />
-            </button>
+              </SelectTrigger>
+              <SelectContent>
+                {TOKENS.map((token) => (
+                  <SelectItem
+                    value={token.symbol}
+                    key={`token-${token.symbol}`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                        <img
+                          src={token.iconImage}
+                          className="size-full object-cover"
+                          alt=""
+                        />
+                      </figure>
+                      <div className="text-left -space-y-0.5">
+                        <div className="font-semibold">{token.symbol}</div>
+                        <div className="text-xs text-white/60">
+                          {token.name}
+                        </div>
+                      </div>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Amount Input */}
@@ -106,19 +136,46 @@ export default function DrawerWithdraw() {
           {/* Chain Selection */}
           <div>
             <label className="text-xs text-white/60 mb-2 block">Network</label>
-            <button className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
-                  <img
-                    src={selectedChain.iconImage}
-                    className="size-full object-cover"
-                    alt=""
-                  />
-                </figure>
-                <span className="font-semibold">{selectedChain.name}</span>
-              </div>
-              <IoChevronDown className="text-white/60" />
-            </button>
+            <Select
+              value={selectedChain.name}
+              onValueChange={(value) => {
+                const chain = DEPOSIT_CHAINS.find((c) => c.name === value)
+                if (chain) setSelectedChain(chain)
+              }}
+            >
+              <SelectTrigger>
+                <div className="flex items-center gap-3">
+                  <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                    <img
+                      src={selectedChain.iconImage}
+                      className="size-full object-cover"
+                      alt=""
+                    />
+                  </figure>
+                  <span className="font-semibold">{selectedChain.name}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {DEPOSIT_CHAINS.map((chain) => (
+                  <SelectItem
+                    onClick={() => setSelectedChain(chain)}
+                    key={`chain-${chain.name}`}
+                    value={chain.name}
+                  >
+                    <div className="flex items-center gap-3">
+                      <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                        <img
+                          src={chain.iconImage}
+                          className="size-full object-cover"
+                          alt=""
+                        />
+                      </figure>
+                      <span className="font-semibold">{chain.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Info Section */}
@@ -140,7 +197,7 @@ export default function DrawerWithdraw() {
           </div>
 
           {/* Description */}
-          <p className="text-xs text-white/60 text-center">
+          <p className="text-xs mt-2 text-white/60 text-center">
             Funds will be sent to your selected network. Make sure the receiving
             address supports this network.
           </p>
