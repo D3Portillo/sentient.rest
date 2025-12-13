@@ -4,6 +4,7 @@ import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
 import { cn } from "@/lib/utils"
+import { IoCloseSharp } from "react-icons/io5"
 
 const DrawerContext = React.createContext<{ modal: boolean }>({ modal: true })
 
@@ -79,6 +80,11 @@ const DrawerContent = React.forwardRef<
         )}
         {...props}
       >
+        <DrawerClose asChild>
+          <button className="top-1.5 right-2.5 outline-none p-3 text-xl absolute">
+            <IoCloseSharp />
+          </button>
+        </DrawerClose>
         <div className="mt-3" />
         {children}
       </DrawerPrimitive.Content>

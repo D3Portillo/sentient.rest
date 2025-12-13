@@ -53,7 +53,7 @@ export default function DrawerWithdraw() {
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerContent className="max-w-md h-[calc(100vh-1.5rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
+      <DrawerContent className="max-w-md h-[calc(100vh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Transfer Funds</DrawerTitle>
         </DrawerHeader>
@@ -64,14 +64,14 @@ export default function DrawerWithdraw() {
             <label className="text-xs text-white/60 mb-2 block">Token</label>
             <button className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <figure className="size-6 rounded-full overflow-hidden">
+                <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                   <img
                     src={selectedToken.iconImage}
                     className="size-full object-cover"
                     alt=""
                   />
                 </figure>
-                <div className="text-left">
+                <div className="text-left -space-y-0.5">
                   <div className="font-semibold">{selectedToken.symbol}</div>
                   <div className="text-xs text-white/60">
                     {selectedToken.name}
@@ -97,7 +97,7 @@ export default function DrawerWithdraw() {
                 placeholder="0.00"
                 className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 text-lg outline-none focus:border-white/20 transition-colors"
               />
-              <button className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-white">
+              <button className="absolute px-2 right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-white">
                 MAX
               </button>
             </div>
@@ -108,7 +108,7 @@ export default function DrawerWithdraw() {
             <label className="text-xs text-white/60 mb-2 block">Network</label>
             <button className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 flex items-center justify-between">
               <div className="flex items-center gap-3">
-                <figure className="size-6 rounded-full overflow-hidden">
+                <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                   <img
                     src={selectedChain.iconImage}
                     className="size-full object-cover"

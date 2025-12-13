@@ -51,7 +51,11 @@ export default function DialogAddress() {
 
         {/* Actions */}
         <div className="w-full mt-4 grid gap-4">
-          <Button className="bg-white hover:bg-white/95">
+          <Button variant="secondary" onClick={signOut}>
+            Disconnect
+          </Button>
+
+          <Button className="bg-white outline-2 outline-white/20 px-6 hover:bg-white/95">
             <span className="grow text-left">Deposit</span>
 
             {/* Overlapping chain logos */}
@@ -59,7 +63,7 @@ export default function DialogAddress() {
               {DEPOSIT_CHAINS.map((chain, idx) => (
                 <figure
                   key={`chain-${chain.name}`}
-                  className="size-6 rounded-full overflow-hidden bg-black/10 border border-black"
+                  className="size-6 rounded-full overflow-hidden bg-gray-300 border border-black"
                   style={{ zIndex: DEPOSIT_CHAINS.length - idx }}
                 >
                   <img
@@ -72,10 +76,6 @@ export default function DialogAddress() {
             </div>
 
             <FaArrowRight className="text-lg" />
-          </Button>
-
-          <Button variant="secondary" onClick={signOut}>
-            Disconnect
           </Button>
         </div>
       </div>
