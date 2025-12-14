@@ -2,14 +2,21 @@
 
 import { atom, useAtom } from "jotai"
 import { useState } from "react"
+import QRCode from "react-qr-code"
+
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
+import { useSentientWallet } from "@/lib/wallets"
+
+import { IoCopy, IoCheckmark } from "react-icons/io5"
+
+import { TOKENS } from "./DrawerWithdraw"
 import { DEPOSIT_CHAINS } from "./DialogAddress"
 import Button from "./Button"
 
-const atomWithdrawModalOpen = atom(false)
-export const useWithdrawModal = () => {
-  const [open, setOpen] = useAtom(atomWithdrawModalOpen)
+const atomDepositModalOpen = atom(false)
+export const useDepositModal = () => {
+  const [open, setOpen] = useAtom(atomDepositModalOpen)
   return {
     open,
     setOpen,
@@ -17,44 +24,28 @@ export const useWithdrawModal = () => {
   }
 }
 
-export const TOKENS = [
-  {
-    symbol: "WLD",
-    name: "Worldcoin",
-    balance: "0.00",
-    iconImage: "/tokens/wld.png",
-  },
-  {
-    symbol: "USDC",
-    name: "USD Coin",
-    balance: "0.00",
-    iconImage: "/tokens/usdc.png",
-  },
-  {
-    symbol: "USDT",
-    name: "Tether USD",
-    balance: "0.00",
-    iconImage: "/tokens/usdt.png",
-  },
-  {
-    symbol: "ETH",
-    name: "Ethereum",
-    balance: "0.00",
-    iconImage: "/tokens/eth.png",
-  },
-]
-
-export default function DrawerWithdraw() {
-  const { open, setOpen } = useWithdrawModal()
+export default function DrawerDeposit() {
+  const { open, setOpen } = useDepositModal()
+  const { wallet } = useSentientWallet()
   const [selectedChain, setSelectedChain] = useState(DEPOSIT_CHAINS[1])
   const [selectedToken, setSelectedToken] = useState(TOKENS[0])
-  const [amount, setAmount] = useState("")
+  const [copied, setCopied] = useState(false)
+
+  const isSolana = selectedChain.name.toLowerCase().includes("solana")
+  const depositAddress = isSolana ? wallet?.solana.address : wallet?.evm.address
+
+  const handleCopy = async () => {
+    if (!depositAddress) return
+    await navigator.clipboard.writeText(depositAddress)
+    setCopied(true)
+    setTimeout(() => setCopied(false), 2000)
+  }
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerContent className="max-w-md h-[calc(100vh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
-          <DrawerTitle>Transfer Funds</DrawerTitle>
+          <DrawerTitle>Deposit Funds</DrawerTitle>
         </DrawerHeader>
 
         <div className="flex flex-col gap-4 px-4 pb-4 flex-1">
@@ -112,27 +103,6 @@ export default function DrawerWithdraw() {
             </Select>
           </div>
 
-          {/* Amount Input */}
-          <div>
-            <div className="flex justify-between items-center mb-2">
-              <label className="text-xs text-white/60">Amount</label>
-              <span className="text-xs text-white/60">
-                Balance: {selectedToken.balance} {selectedToken.symbol}
-              </span>
-            </div>
-            <div className="relative">
-              <input
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                placeholder="0.00"
-                className="w-full h-14 px-4 rounded-lg bg-white/5 border border-white/10 text-lg outline-none focus:border-white/20 transition-colors"
-              />
-              <button className="absolute px-2 right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-white">
-                MAX
-              </button>
-            </div>
-          </div>
-
           {/* Chain Selection */}
           <div>
             <label className="text-xs text-white/60 mb-2 block">Network</label>
@@ -179,15 +149,34 @@ export default function DrawerWithdraw() {
           </div>
 
           {/* Info Section */}
-          <div className="mt-2 p-4 rounded-lg bg-white/5 space-y-2">
-            <div className="flex justify-between text-xs">
-              <span className="text-white/60">Min Transfer</span>
-              <span>0.01 {selectedToken.symbol}</span>
+          <div className="p-4 rounded-lg bg-white/5 space-y-2">
+            <div className="flex flex-col items-center gap-4 pb-2">
+              <button
+                onClick={handleCopy}
+                className="flex active:scale-98 w-full items-center gap-4 text-xs"
+              >
+                <div className="break-all grow">
+                  {depositAddress || "Generating..."}
+                </div>
+                <div className="shrink-0 text-base">
+                  {copied ? <IoCheckmark className="scale-110" /> : <IoCopy />}
+                </div>
+              </button>
+
+              <div className="bg-white size-[clamp(8rem,30vw,16rem)] p-3 rounded-lg">
+                {depositAddress ? (
+                  <QRCode
+                    className="size-full object-cover"
+                    viewBox="0 0 120 120"
+                    value={depositAddress}
+                  />
+                ) : null}
+              </div>
             </div>
 
             <div className="flex justify-between text-xs">
-              <span className="text-white/60">Platform Fees</span>
-              <span>~$0.50</span>
+              <span className="text-white/60">Min Deposit</span>
+              <span>0.01 {selectedToken.symbol}</span>
             </div>
 
             <div className="flex justify-between text-xs">
@@ -196,14 +185,9 @@ export default function DrawerWithdraw() {
             </div>
           </div>
 
-          {/* Description */}
-          <p className="text-xs mt-2 text-white/60 text-center">
-            Make sure the receiving address supports this network.
-          </p>
-
           <div className="flex-1" />
 
-          <Button>Confirm Transfer</Button>
+          <Button>View Transactions</Button>
         </div>
       </DrawerContent>
     </Drawer>

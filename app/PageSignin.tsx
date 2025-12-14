@@ -14,7 +14,8 @@ import { FaArrowRight } from "react-icons/fa"
 import { IoBackspaceSharp, IoShield } from "react-icons/io5"
 import { SiEnpass } from "react-icons/si"
 
-import { beautifyAddress, cn } from "./lib/utils"
+import { getSolanaAccountFromSeed } from "@/lib/solana"
+import { beautifyAddress, cn } from "@/lib/utils"
 import { Logo } from "./components/icons"
 import Button from "@/components/Button"
 import PageContainer from "./PageContainer"
@@ -47,10 +48,12 @@ export default function PageSignin() {
 
   async function handleSignIn() {
     if (isDevEnv()) {
+      const seed = keccak256(toHex(await getDevPk()))
       // Mock wallet for dev environment
-      return unsafeSetWallet(
-        privateKeyToAccount(keccak256(toHex(await getDevPk())))
-      )
+      return unsafeSetWallet({
+        evm: privateKeyToAccount(seed),
+        solana: await getSolanaAccountFromSeed(seed),
+      })
     }
 
     signIn()
@@ -69,9 +72,12 @@ export default function PageSignin() {
       }
 
       const signature = finalPayload.signature
-      const privateKeyHash = keccak256(toHex(signature))
-      const account = privateKeyToAccount(privateKeyHash)
-      const { encrypted, iv } = await encryptPin(pin, signature)
+      const seed = keccak256(toHex(signature))
+      const account = privateKeyToAccount(seed)
+      const [solana, { encrypted, iv }] = await Promise.all([
+        getSolanaAccountFromSeed(seed),
+        encryptPin(pin, signature),
+      ])
 
       setWallets((prev) => ({
         ...prev,
@@ -82,7 +88,11 @@ export default function PageSignin() {
         },
       }))
 
-      unsafeSetWallet(account)
+      unsafeSetWallet({
+        solana,
+        evm: account,
+      })
+
       setPinMode(null)
     } catch (error) {
       console.error({ error })
@@ -115,14 +125,18 @@ export default function PageSignin() {
         throw new Error("InvalidPIN")
       }
 
-      const privateKeyHash = keccak256(toHex(finalPayload.signature))
-      const account = privateKeyToAccount(privateKeyHash)
+      const seed = keccak256(toHex(finalPayload.signature))
+      const account = privateKeyToAccount(seed)
+      const solana = await getSolanaAccountFromSeed(seed)
 
       if (account.address !== WALLET.address) {
         throw new Error("WalletMismatch")
       }
 
-      unsafeSetWallet(account)
+      unsafeSetWallet({
+        evm: account,
+        solana,
+      })
       setPinMode(null)
     } catch (error) {
       console.error({ error })

@@ -1,5 +1,6 @@
 import { useAtom, atom } from "jotai"
 import { privateKeyToAccount } from "viem/accounts"
+import { type getSolanaAccountFromSeed } from "./solana"
 
 // AES-GCM encryption using Web Crypto API
 export async function encryptPin(
@@ -68,7 +69,10 @@ export async function decryptPin(
 }
 
 const atomUnlockedWallet = atom(
-  null as null | ReturnType<typeof privateKeyToAccount>
+  null as null | {
+    evm: ReturnType<typeof privateKeyToAccount>
+    solana: Awaited<ReturnType<typeof getSolanaAccountFromSeed>>
+  }
 )
 
 export const useSentientWallet = () => {

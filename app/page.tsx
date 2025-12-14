@@ -11,19 +11,21 @@ import { FaArrowsRotate } from "react-icons/fa6"
 
 import { isDevEnv } from "@/lib/env"
 import { useWithdrawModal } from "@/components/DrawerWithdraw"
+import { useDepositModal } from "@/components/DrawerDeposit"
 import { useSentientWallet } from "@/lib/wallets"
 
+import DialogAddress from "@/components/DialogAddress"
 import PageSignin from "./PageSignin"
 import PageContainer from "./PageContainer"
-import DialogAddress from "./components/DialogAddress"
 
 export default function Home() {
-  const { toggle } = useWithdrawModal()
+  const { toggle: toggleWithdraw } = useWithdrawModal()
+  const { toggle: toggleDeposit } = useDepositModal()
   const { isConnected } = useWorldAuth()
   const { wallet } = useSentientWallet()
 
   // Show when not conencted or no Sentient wallet created
-  const showConnectState = isDevEnv() ? false : !isConnected || !wallet
+  const showConnectState = (!isDevEnv() && !isConnected) || !wallet
   if (showConnectState) return <PageSignin />
 
   return (
@@ -51,7 +53,7 @@ export default function Home() {
         {/* Action Buttons */}
         <div className="grid mt-18 grid-cols-4 gap-2 w-full max-w-sm">
           <button
-            onClick={toggle}
+            onClick={toggleWithdraw}
             className="bg-sw-yellow text-black backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center"
           >
             <figure className="size-9 grid place-items-center">
@@ -60,7 +62,10 @@ export default function Home() {
             <span className="text-xs font-semibold">Send</span>
           </button>
 
-          <button className="bg-white/10 backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center hover:bg-white/15 transition-colors">
+          <button
+            onClick={toggleDeposit}
+            className="bg-white/10 backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center hover:bg-white/15 transition-colors"
+          >
             <figure className="size-9 grid place-items-center">
               <TbArrowDownLeft className="text-3xl" />
             </figure>
@@ -119,7 +124,7 @@ export default function Home() {
           </button>
 
           <button
-            onClick={toggle}
+            onClick={toggleWithdraw}
             className="flex drop-shadow-[0_0_20px_rgba(255,255,0,0.5)] -top-2 flex-col items-center gap-1 relative"
           >
             <div className="size-12 -top-1 bg-sw-yellow text-black rounded-full flex items-center justify-center absolute">
