@@ -19,6 +19,7 @@ import { beautifyAddress, cn } from "@/lib/utils"
 import { Logo } from "./components/icons"
 import Button from "@/components/Button"
 import PageContainer from "./PageContainer"
+import { getFuelWalletFromSeed } from "./lib/fuel"
 
 interface WalletData {
   encryptedPin: string
@@ -53,6 +54,7 @@ export default function PageSignin() {
       return unsafeSetWallet({
         evm: privateKeyToAccount(seed),
         solana: await getSolanaAccountFromSeed(seed),
+        fuel: getFuelWalletFromSeed(seed),
       })
     }
 
@@ -74,6 +76,7 @@ export default function PageSignin() {
       const signature = finalPayload.signature
       const seed = keccak256(toHex(signature))
       const account = privateKeyToAccount(seed)
+      const fuel = getFuelWalletFromSeed(seed)
       const [solana, { encrypted, iv }] = await Promise.all([
         getSolanaAccountFromSeed(seed),
         encryptPin(pin, signature),
@@ -90,6 +93,7 @@ export default function PageSignin() {
 
       unsafeSetWallet({
         solana,
+        fuel,
         evm: account,
       })
 
@@ -128,6 +132,7 @@ export default function PageSignin() {
       const seed = keccak256(toHex(finalPayload.signature))
       const account = privateKeyToAccount(seed)
       const solana = await getSolanaAccountFromSeed(seed)
+      const fuel = getFuelWalletFromSeed(seed)
 
       if (account.address !== WALLET.address) {
         throw new Error("WalletMismatch")
@@ -136,6 +141,7 @@ export default function PageSignin() {
       unsafeSetWallet({
         evm: account,
         solana,
+        fuel,
       })
       setPinMode(null)
     } catch (error) {

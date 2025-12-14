@@ -52,7 +52,7 @@ export default function DrawerWithdraw() {
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerContent className="max-w-md h-[calc(100vh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
+      <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Transfer Funds</DrawerTitle>
         </DrawerHeader>

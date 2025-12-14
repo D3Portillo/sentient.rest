@@ -32,7 +32,13 @@ export default function DrawerDeposit() {
   const [copied, setCopied] = useState(false)
 
   const isSolana = selectedChain.name.toLowerCase().includes("solana")
-  const depositAddress = isSolana ? wallet?.solana.address : wallet?.evm.address
+  const isFuel = selectedChain.name.toLowerCase().includes("fuel")
+
+  const depositAddress = isFuel
+    ? wallet?.fuel.address
+    : isSolana
+    ? wallet?.solana.address
+    : wallet?.evm.address
 
   const handleCopy = async () => {
     if (!depositAddress) return
@@ -43,7 +49,7 @@ export default function DrawerDeposit() {
 
   return (
     <Drawer open={open} onOpenChange={setOpen}>
-      <DrawerContent className="max-w-md h-[calc(100vh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
+      <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Deposit Funds</DrawerTitle>
         </DrawerHeader>
@@ -150,22 +156,35 @@ export default function DrawerDeposit() {
 
           {/* Info Section */}
           <div className="p-4 rounded-lg bg-white/5 space-y-2">
-            <div className="flex flex-col items-center gap-4 pb-2">
+            <div className="flex flex-col items-center gap-4 pb-5">
               <button
                 onClick={handleCopy}
-                className="flex active:scale-98 w-full items-center gap-4 text-xs"
+                className="flex text-sm text-left active:scale-98 w-full items-start gap-2"
               >
                 <div className="break-all grow">
+                  <span className="text-white/60">Address /</span>{" "}
                   {depositAddress || "Generating..."}
                 </div>
-                <div className="shrink-0 text-base">
+
+                <div className="shrink-0 text-base pt-1">
                   {copied ? <IoCheckmark className="scale-110" /> : <IoCopy />}
                 </div>
               </button>
 
-              <div className="bg-white size-[clamp(8rem,30vw,16rem)] p-3 rounded-lg">
+              <div className="bg-white relative size-[clamp(10rem,50vw,16rem)] p-2 rounded-lg">
+                {depositAddress && (
+                  <figure className="absolute z-1 size-9 border-2 border-white overflow-hidden rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                    <img
+                      src={selectedChain.iconImage}
+                      className="size-full object-cover"
+                      alt=""
+                    />
+                  </figure>
+                )}
                 {depositAddress ? (
                   <QRCode
+                    // Force re-render when address changes
+                    key={`address-${depositAddress}`}
                     className="size-full object-cover"
                     viewBox="0 0 120 120"
                     value={depositAddress}

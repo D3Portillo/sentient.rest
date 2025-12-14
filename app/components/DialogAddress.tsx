@@ -9,6 +9,7 @@ import { FaArrowRight } from "react-icons/fa"
 import AddressBlock from "./AddressBlock"
 import Dialog from "./Dialog"
 import Button from "./Button"
+import { useDepositModal } from "./DrawerDeposit"
 
 // Supported deposit chains
 export const DEPOSIT_CHAINS = [
@@ -23,6 +24,7 @@ export const DEPOSIT_CHAINS = [
 export default function DialogAddress() {
   const { address, signOut } = useWorldAuth()
   const { profile } = useWorldProfile(address)
+  const { toggle: showDepositModal } = useDepositModal()
 
   const USERNAME =
     profile?.username ||
@@ -50,12 +52,15 @@ export default function DialogAddress() {
         </nav>
 
         {/* Actions */}
-        <div className="w-full mt-4 grid gap-4">
+        <div className="w-full mt-12 grid gap-4">
           <Button variant="secondary" onClick={signOut}>
             Disconnect
           </Button>
 
-          <Button className="bg-white outline-2 outline-white/20 px-6 hover:bg-white/95">
+          <Button
+            onClick={showDepositModal}
+            className="bg-white outline-2 outline-white/20 px-6 hover:bg-white/95"
+          >
             <span className="grow text-left">Deposit</span>
 
             {/* Overlapping chain logos */}
