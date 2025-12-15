@@ -1,17 +1,21 @@
 "use client"
 
 import { atom, useAtom } from "jotai"
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import QRCode from "react-qr-code"
 
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
 import { useSentientWallet } from "@/lib/wallets"
 
+import {
+  CHAIN_WORLD,
+  getChainsForToken,
+  TOKEN_WLD,
+  TOKENS_LIST,
+} from "@/lib/registry"
 import { IoCopy, IoCheckmark } from "react-icons/io5"
 
-import { TOKENS } from "./DrawerWithdraw"
-import { DEPOSIT_CHAINS } from "./DialogAddress"
 import Button from "./Button"
 
 const atomDepositModalOpen = atom(false)
@@ -27,8 +31,8 @@ export const useDepositModal = () => {
 export default function DrawerDeposit() {
   const { open, setOpen } = useDepositModal()
   const { wallet } = useSentientWallet()
-  const [selectedChain, setSelectedChain] = useState(DEPOSIT_CHAINS[1])
-  const [selectedToken, setSelectedToken] = useState(TOKENS[0])
+  const [selectedChain, setSelectedChain] = useState(CHAIN_WORLD)
+  const [selectedToken, setSelectedToken] = useState(TOKEN_WLD)
   const [copied, setCopied] = useState(false)
 
   const isSolana = selectedChain.name.toLowerCase().includes("solana")
@@ -47,6 +51,25 @@ export default function DrawerDeposit() {
     setTimeout(() => setCopied(false), 2000)
   }
 
+  const CHAINS = getChainsForToken(selectedToken.symbol)
+
+  useEffect(() => {
+    // If token not available for chain - set to first available chain
+    const isInAvailableChains = CHAINS.find(
+      (c) => c.name === selectedChain.name
+    )
+
+    if (!isInAvailableChains) setSelectedChain(CHAINS[0])
+  }, [selectedToken.symbol])
+
+  useEffect(() => {
+    if (open) {
+      // Reset to defaults on open
+      setSelectedChain(CHAIN_WORLD)
+      setSelectedToken(TOKEN_WLD)
+    }
+  }, [open])
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
@@ -61,7 +84,7 @@ export default function DrawerDeposit() {
             <Select
               value={selectedToken.symbol}
               onValueChange={(value) => {
-                const token = TOKENS.find((t) => t.symbol === value)
+                const token = TOKENS_LIST.find((t) => t.symbol === value)
                 if (token) setSelectedToken(token)
               }}
             >
@@ -83,7 +106,7 @@ export default function DrawerDeposit() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS.map((token) => (
+                {TOKENS_LIST.map((token) => (
                   <SelectItem
                     value={token.symbol}
                     key={`token-${token.symbol}`}
@@ -113,9 +136,9 @@ export default function DrawerDeposit() {
           <div>
             <label className="text-xs text-white/60 mb-2 block">Network</label>
             <Select
-              value={selectedChain.name}
-              onValueChange={(value) => {
-                const chain = DEPOSIT_CHAINS.find((c) => c.name === value)
+              value={selectedChain.id}
+              onValueChange={(id) => {
+                const chain = CHAINS.find((c) => c.id === id)
                 if (chain) setSelectedChain(chain)
               }}
             >
@@ -132,11 +155,11 @@ export default function DrawerDeposit() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {DEPOSIT_CHAINS.map((chain) => (
+                {CHAINS.map((chain) => (
                   <SelectItem
                     onClick={() => setSelectedChain(chain)}
                     key={`chain-${chain.name}`}
-                    value={chain.name}
+                    value={chain.id}
                   >
                     <div className="flex items-center gap-3">
                       <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
@@ -159,21 +182,21 @@ export default function DrawerDeposit() {
             <div className="flex flex-col items-center gap-4 pb-5">
               <button
                 onClick={handleCopy}
-                className="flex text-sm text-left active:scale-98 w-full items-start gap-2"
+                className="flex text-xs text-left active:scale-98 w-full items-start gap-2"
               >
                 <div className="break-all grow">
                   <span className="text-white/60">Address /</span>{" "}
                   {depositAddress || "Generating..."}
                 </div>
 
-                <div className="shrink-0 text-base pt-1">
+                <div className="shrink-0 text-sm pt-0.5">
                   {copied ? <IoCheckmark className="scale-110" /> : <IoCopy />}
                 </div>
               </button>
 
               <div className="bg-white relative size-[clamp(10rem,50vw,16rem)] p-2 rounded-lg">
                 {depositAddress && (
-                  <figure className="absolute z-1 size-9 border-2 border-white overflow-hidden rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+                  <figure className="absolute z-1 size-9 border-2 border-white bg-white/90 backdrop-blur overflow-hidden rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <img
                       src={selectedChain.iconImage}
                       className="size-full object-cover"

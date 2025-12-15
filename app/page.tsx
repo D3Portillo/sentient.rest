@@ -42,7 +42,7 @@ export default function Home() {
       <section className="flex-1 flex flex-col items-center justify-start pt-16">
         <h1 className="text-6xl font-bold mb-4">$0.2397</h1>
         <div className="flex items-center gap-4">
-          <button className="bg-sw-green/20 hover:bg-sw-green/30 backdrop-blur-sm rounded-full pl-4 pr-3 py-1.5 flex items-center gap-2 transition-colors">
+          <button className="bg-sw-green/20 hover:bg-sw-green/30 backdrop-blur-sm rounded-full pl-3 pr-2 py-1 flex items-center gap-2 transition-colors">
             <span className="text-sw-green font-medium">$0 earned</span>
             <IoInformationCircleOutline className="text-sw-green text-xl" />
           </button>

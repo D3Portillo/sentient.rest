@@ -5,21 +5,12 @@ import { useWorldProfile } from "@/hooks/world"
 import { beautifyAddress } from "@/lib/utils"
 
 import { FaArrowRight } from "react-icons/fa"
+import { CHAINS_LIST } from "@/lib/registry"
 
+import { useDepositModal } from "./DrawerDeposit"
 import AddressBlock from "./AddressBlock"
 import Dialog from "./Dialog"
 import Button from "./Button"
-import { useDepositModal } from "./DrawerDeposit"
-
-// Supported deposit chains
-export const DEPOSIT_CHAINS = [
-  { name: "Base", iconImage: "/chains/base.png" },
-  { name: "Worldchain", iconImage: "/chains/world.png" },
-  { name: "Arbitrum", iconImage: "/chains/arbitrum.png" },
-  { name: "Optimism", iconImage: "/chains/optimism.png" },
-  { name: "Fuel", iconImage: "/chains/fuel.png" },
-  { name: "Solana", iconImage: "/chains/solana.png" },
-]
 
 export default function DialogAddress() {
   const { address, signOut } = useWorldAuth()
@@ -64,12 +55,12 @@ export default function DialogAddress() {
             <span className="grow text-left">Deposit</span>
 
             {/* Overlapping chain logos */}
-            <div className="flex -space-x-2 ml-2">
-              {DEPOSIT_CHAINS.map((chain, idx) => (
+            <div className="flex -space-x-2">
+              {CHAINS_LIST.map((chain, idx) => (
                 <figure
                   key={`chain-${chain.name}`}
-                  className="size-6 rounded-full overflow-hidden bg-gray-300 border border-black"
-                  style={{ zIndex: DEPOSIT_CHAINS.length - idx }}
+                  className="size-7 rounded-full overflow-hidden bg-gray-300 border-2 border-black"
+                  style={{ zIndex: CHAINS_LIST.length - idx }}
                 >
                   <img
                     src={chain.iconImage}
