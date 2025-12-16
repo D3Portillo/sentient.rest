@@ -48,6 +48,10 @@ const TOKENS: Record<string, TokenConfig> = {
         address: "0x2cFc85d8E48F8EAB294be644d9E25C3030863003",
         decimals: 18,
       },
+      OPTIMISM: {
+        address: "0xdC6fF44d5d932Cbd77B52E5612Ba0529DC6226F1",
+        decimals: 18,
+      },
     },
     iconImage: "/tokens/wld.png",
   },

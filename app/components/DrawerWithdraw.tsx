@@ -6,10 +6,10 @@ import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
 import Button from "./Button"
 import {
+  CHAINS_LIST,
   CHAIN_WORLD,
-  TOKENS_LIST,
   TOKEN_WLD,
-  getChainsForToken,
+  getTokensForChain,
 } from "@/lib/registry"
 
 const atomWithdrawModalOpen = atom(false)
@@ -28,17 +28,6 @@ export default function DrawerWithdraw() {
   const [selectedToken, setSelectedToken] = useState(TOKEN_WLD)
   const [amount, setAmount] = useState("")
 
-  const CHAINS = getChainsForToken(selectedToken.symbol)
-
-  useEffect(() => {
-    // If token not available for chain - set to first available chain
-    const isInAvailableChains = CHAINS.find(
-      (c) => c.name === selectedChain.name
-    )
-
-    if (!isInAvailableChains) setSelectedChain(CHAINS[0])
-  }, [selectedToken.symbol])
-
   useEffect(() => {
     if (open) {
       // Reset to defaults on open
@@ -48,6 +37,16 @@ export default function DrawerWithdraw() {
     }
   }, [open])
 
+  const TOKENS = getTokensForChain(selectedChain.id)
+
+  useEffect(() => {
+    // Set to first available token for chain when not in list
+    const isCurrentTokenAvialable = TOKENS.find(
+      (t) => t.symbol === selectedToken.symbol
+    )
+    if (!isCurrentTokenAvialable) setSelectedToken(TOKENS[0])
+  }, [selectedChain.id])
+
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
@@ -56,13 +55,54 @@ export default function DrawerWithdraw() {
         </DrawerHeader>
 
         <div className="flex flex-col gap-4 px-4 pb-4 flex-1">
+          {/* Chain Selection */}
+          <div>
+            <label className="text-xs text-white/60 mb-2 block">Network</label>
+            <Select
+              value={selectedChain.id}
+              onValueChange={(id) => {
+                const chain = CHAINS_LIST.find((c) => c.id === id)
+                if (chain) setSelectedChain(chain)
+              }}
+            >
+              <SelectTrigger>
+                <div className="flex items-center gap-3">
+                  <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                    <img
+                      src={selectedChain.iconImage}
+                      className="size-full object-cover"
+                      alt=""
+                    />
+                  </figure>
+                  <span className="font-semibold">{selectedChain.name}</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                {CHAINS_LIST.map((chain) => (
+                  <SelectItem key={`chain-${chain.name}`} value={chain.id}>
+                    <div className="flex items-center gap-3">
+                      <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
+                        <img
+                          src={chain.iconImage}
+                          className="size-full object-cover"
+                          alt=""
+                        />
+                      </figure>
+                      <span className="font-semibold">{chain.name}</span>
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Token Selection */}
           <div>
             <label className="text-xs text-white/60 mb-2 block">Token</label>
             <Select
               value={selectedToken.symbol}
               onValueChange={(value) => {
-                const token = TOKENS_LIST.find((t) => t.symbol === value)
+                const token = TOKENS.find((t) => t.symbol === value)
                 if (token) setSelectedToken(token)
               }}
             >
@@ -84,7 +124,7 @@ export default function DrawerWithdraw() {
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS_LIST.map((token) => (
+                {TOKENS.map((token) => (
                   <SelectItem
                     value={token.symbol}
                     key={`token-${token.symbol}`}
@@ -103,47 +143,6 @@ export default function DrawerWithdraw() {
                           {token.name}
                         </div>
                       </div>
-                    </div>
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          {/* Chain Selection */}
-          <div>
-            <label className="text-xs text-white/60 mb-2 block">Network</label>
-            <Select
-              value={selectedChain.id}
-              onValueChange={(id) => {
-                const chain = CHAINS.find((c) => c.id === id)
-                if (chain) setSelectedChain(chain)
-              }}
-            >
-              <SelectTrigger>
-                <div className="flex items-center gap-3">
-                  <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
-                    <img
-                      src={selectedChain.iconImage}
-                      className="size-full object-cover"
-                      alt=""
-                    />
-                  </figure>
-                  <span className="font-semibold">{selectedChain.name}</span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                {CHAINS.map((chain) => (
-                  <SelectItem key={`chain-${chain.name}`} value={chain.id}>
-                    <div className="flex items-center gap-3">
-                      <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
-                        <img
-                          src={chain.iconImage}
-                          className="size-full object-cover"
-                          alt=""
-                        />
-                      </figure>
-                      <span className="font-semibold">{chain.name}</span>
                     </div>
                   </SelectItem>
                 ))}
