@@ -11,6 +11,7 @@ import { FaArrowsRotate } from "react-icons/fa6"
 
 import { isDevEnv } from "@/lib/env"
 import { useWithdrawModal } from "@/components/DrawerWithdraw"
+import { useTopUpModal } from "@/components/DrawerTopUp"
 import { useDepositModal } from "@/components/DrawerDeposit"
 import { useSentientWallet } from "@/lib/wallets"
 
@@ -21,6 +22,7 @@ import PageContainer from "./PageContainer"
 export default function Home() {
   const { toggle: toggleWithdraw } = useWithdrawModal()
   const { toggle: toggleDeposit } = useDepositModal()
+  const { toggle: toggleTopUp } = useTopUpModal()
   const { isConnected } = useWorldAuth()
   const { wallet } = useSentientWallet()
 
@@ -47,7 +49,9 @@ export default function Home() {
             <IoInformationCircleOutline className="text-sw-green text-xl" />
           </button>
 
-          <button className="text-white/60">Add funds +</button>
+          <button onClick={toggleTopUp} className="text-white/60">
+            Add funds +
+          </button>
         </div>
 
         {/* Action Buttons */}

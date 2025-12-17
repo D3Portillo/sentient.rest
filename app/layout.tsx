@@ -8,8 +8,9 @@ import { AlertProvider } from "@/components/Alert"
 import DrawerWithdraw from "@/components/DrawerWithdraw"
 import SafeInsetProvider from "@/components/SafeInsetProvider"
 import ErudaProvider from "@/components/ErudaProdiver"
-import DrawerDeposit from "@/components/DrawerDeposit"
 
+import DrawerTopUp from "./components/DrawerTopUp"
+import DrawerDeposit from "@/components/DrawerDeposit"
 import WorldProvider from "./WorldProvider"
 
 const nextFont = Inter({
@@ -59,6 +60,7 @@ export default function RootLayout({
             <SafeInsetProvider>
               <DrawerWithdraw />
               <DrawerDeposit />
+              <DrawerTopUp />
               {children}
             </SafeInsetProvider>
           </ErudaProvider>

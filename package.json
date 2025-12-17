@@ -17,6 +17,7 @@
     "@radish-la/world-auth": "0.0.1-alpha.19",
     "@radix-ui/react-dialog": "^1.1.15",
     "@radix-ui/react-select": "^2.2.6",
+    "@ramp-network/ramp-instant-sdk": "^6.2.0",
     "@solana/accounts": "^5.1.0",
     "@solana/kit": "^5.1.0",
     "@worldcoin/minikit-js": "^1.9.8",
