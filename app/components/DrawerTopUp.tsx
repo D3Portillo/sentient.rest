@@ -114,6 +114,8 @@ export default function DrawerTopUp() {
         amountUsd: debouncedAmount,
       },
     })
+
+    window.open(link, "_blank", "noopener,noreferrer")
   }
 
   return (
@@ -197,7 +199,7 @@ export default function DrawerTopUp() {
           )}
 
           <Button onClick={processBuyAssets}>Buy with Coinbase</Button>
-          <Button>Buy with DaimoPay</Button>
+          <Button onClick={buyWithDaimoPay}>Buy with DaimoPay</Button>
         </div>
       </DrawerContent>
     </Drawer>
