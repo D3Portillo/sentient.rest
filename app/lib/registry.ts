@@ -170,6 +170,7 @@ const TOKENS: Record<string, TokenConfig> = {
 
 export const TOKENS_LIST = Object.values(TOKENS)
 export const TOKEN_WLD = TOKENS_LIST[0]
+export const TOKEN_USDC = TOKENS_LIST.find((t) => t.symbol === "USDC")!
 
 export const getTokensForChain = (chain: DepositChain) => {
   return TOKENS_LIST.filter((token) => token.chains?.[chain])
