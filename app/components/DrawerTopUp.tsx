@@ -55,19 +55,40 @@ export default function DrawerTopUp() {
   )
 
   const processBuyAssets = async () => {
-    new RampInstantSDK({
-      hostAppName: "Your App",
-      fiatCurrency: "USD",
-      credentialless: true,
-      fiatValue: "10",
-      enabledFlows: ["ONRAMP"],
-      offrampAsset: "BASE_USDC",
-      defaultAsset: "BASE_USDC",
-      hideExitButton: true,
-      defaultFlow: "ONRAMP",
-      userAddress: EVM_ADDRESS!,
-      hostApiKey: "wn25y7nx6cyb4oqutc5obnnywwwt4gz36yw5fypw",
-    }).show()
+    const req = await fetch(`/api/quotes`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        purchaseCurrency: "USDC",
+        destinationNetwork: "base",
+        destinationAddress: EVM_ADDRESS!,
+        paymentAmount: "10",
+        paymentMethod: "CARD",
+      } satisfies {
+        purchaseCurrency: "USDC" | "USDT" | "ETH"
+        destinationNetwork:
+          | "base"
+          | "ethereum"
+          | "polygon"
+          | "arbitrum"
+          | "optimism"
+        destinationAddress: string
+        paymentAmount?: string
+        paymentCurrency?: "USD"
+        paymentMethod?: "CARD"
+        country?: string
+        subdivision?: string
+        redirectUrl?: string
+        clientIp?: string
+        partnerUserRef?: string
+      }),
+    })
+    const data = await req.json()
+
+    console.debug({ data })
+    window.open(data.session.onrampUrl, "_blank", "noopener,noreferrer")
   }
 
   return (
@@ -79,7 +100,7 @@ export default function DrawerTopUp() {
 
         <div className="flex flex-col gap-4 px-4 pb-4 flex-1">
           <div className="flex-1" />
-          <Button onClick={processBuyAssets}>Buy</Button>
+          <Button onClick={processBuyAssets}>Buy with Coinbase</Button>
           <Button>View Transactions</Button>
         </div>
       </DrawerContent>
