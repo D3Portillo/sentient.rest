@@ -9,6 +9,7 @@ interface NumpadInputProps {
   onChange: (value: string) => void
   maxLength?: number
   type: "pin" | "amount"
+  className?: string
   error?: string
   label?: string
   placeholder?: string
@@ -18,10 +19,11 @@ export function NumpadInput({
   value,
   onChange,
   maxLength,
+  placeholder = "0",
   type = "amount",
   error,
   label,
-  placeholder = "0",
+  className,
 }: NumpadInputProps) {
   const handleNumpadPress = (digit: number) => {
     if (maxLength && value.length >= maxLength) return
@@ -39,7 +41,7 @@ export function NumpadInput({
   }
 
   return (
-    <div className="flex flex-col gap-6 w-full max-w-72">
+    <div className={cn("flex flex-col gap-6 w-full max-w-72", className)}>
       {/* Display Area */}
       <div className="flex flex-col gap-2">
         {label && (
@@ -70,9 +72,9 @@ export function NumpadInput({
           </div>
         )}
 
-        {error && (
-          <p className="text-red-400 text-center text-xs min-h-4">{error}</p>
-        )}
+        <p className="text-red-400 text-center text-xs min-h-4">
+          {error ? error : null}
+        </p>
       </div>
 
       {/* Numpad */}

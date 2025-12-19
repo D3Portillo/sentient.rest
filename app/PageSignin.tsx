@@ -266,15 +266,14 @@ function PinInput({
         <h1 className="mt-4 font-semibold text-lg">{title}</h1>
         <p className="w-full text-sm max-w-72">{description}</p>
 
-        <div className="mt-8">
-          <NumpadInput
-            type="pin"
-            value={pin}
-            onChange={handleChange}
-            maxLength={4}
-            error={error || undefined}
-          />
-        </div>
+        <NumpadInput
+          type="pin"
+          value={pin}
+          className="mt-8"
+          error={error}
+          maxLength={4}
+          onChange={handleChange}
+        />
       </section>
     </PageContainer>
   )

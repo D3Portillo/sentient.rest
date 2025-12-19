@@ -2,7 +2,7 @@
 
 import type { MetamaskQuoteResponse } from "@/app/api/quotes/metamask/route"
 import type { MetamaskQuoteLinkRequest } from "@/app/api/quotes/metamask/buy-link/route"
-import { useState, useEffect } from "react"
+import { useState, useEffect, Fragment } from "react"
 import { atom, useAtom } from "jotai"
 import useSWR from "swr"
 
@@ -184,10 +184,10 @@ export default function DrawerTopUp() {
           </DrawerTitle>
         </DrawerHeader>
 
-        <div className="flex flex-col gap-4 px-4 pb-4 flex-1">
+        <div className="flex flex-col gap-4 px-4 pb-4 flex-1 overflow-auto">
           {step === "amount" && (
-            <>
-              <div className="flex-1 flex items-center justify-center">
+            <Fragment>
+              <div className="flex-1 grid place-items-center">
                 <NumpadInput
                   type="amount"
                   value={amount}
@@ -201,136 +201,128 @@ export default function DrawerTopUp() {
               >
                 Continue
               </Button>
-            </>
+            </Fragment>
           )}
 
           {step === "method" && (
-            <>
-              <div className="flex flex-col gap-3 flex-1">
-                <MethodOption
-                  icon={<IoCard className="text-2xl" />}
-                  title="Credit/Debit Card"
-                  description="Use credit/debit card to top-up"
-                  onClick={() => handleMethodSelect("card")}
-                />
-                <MethodOption
-                  icon={<TbWorld className="text-2xl" />}
-                  title="World Deposit"
-                  description="Deposit WLD/USDC via World App"
-                  onClick={() => handleMethodSelect("world")}
-                />
-                <MethodOption
-                  icon={<IoSwapHorizontal className="text-2xl" />}
-                  title="Cross-Chain Bridge"
-                  description="Deposit via other chains (DaimoPay)"
-                  onClick={() => handleMethodSelect("cross-chain")}
-                />
-              </div>
-
-              <Button
-                variant="secondary"
-                onClick={() => {
-                  setStep("amount")
-
-                  // Reset amount
-                  setAmount("")
-                }}
-              >
-                Go Back
-              </Button>
-            </>
+            <div className="flex pt-2 flex-col gap-3 flex-1">
+              <MethodOption
+                icon={<IoCard className="text-2xl" />}
+                title="Credit/Debit Card"
+                description="Use credit/debit card to top-up"
+                onClick={() => handleMethodSelect("card")}
+              />
+              <MethodOption
+                icon={<TbWorld className="text-2xl" />}
+                title="World Deposit"
+                description="Deposit WLD/USDC via World App"
+                onClick={() => handleMethodSelect("world")}
+              />
+              <MethodOption
+                icon={<IoSwapHorizontal className="text-2xl" />}
+                title="Cross-Chain Bridge"
+                description="Deposit via other chains (DaimoPay)"
+                onClick={() => handleMethodSelect("cross-chain")}
+              />
+            </div>
           )}
 
-          {step === "provider" && (
-            <>
-              {method === "card" && (
-                <>
-                  <div className="flex flex-col gap-2 flex-1 overflow-auto">
-                    <button
-                      onClick={processBuyAssets}
-                      className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
-                    >
-                      <div className="flex items-center gap-3">
-                        <div className="w-8 h-8 rounded bg-blue-600 grid place-items-center font-bold">
-                          C
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold">Coinbase Pay</div>
-                          <div className="text-xs text-white/60">
-                            Fast & trusted
-                          </div>
+          {step === "provider" &&
+            (method === "card" ? (
+              isLoading ? (
+                <div className="text-center grow grid place-items-center text-sm text-white/60">
+                  <p>Loading...</p>
+                </div>
+              ) : (
+                <div className="flex -mx-4 px-4 flex-col gap-2 flex-1 overflow-auto">
+                  <button
+                    onClick={processBuyAssets}
+                    className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
+                  >
+                    <div className="flex items-center gap-3">
+                      <ProviderIcon seed="coinbase-pay" nameCharacter="C" />
+                      <div className="flex-1">
+                        <div className="font-semibold">Coinbase Pay</div>
+                        <div className="text-xs text-white/60">
+                          Fast & trusted
                         </div>
                       </div>
-                    </button>
+                    </div>
+                  </button>
 
-                    {metamaskQuotes?.success &&
-                      metamaskQuotes.success.length > 0 && (
-                        <>
-                          <div className="text-xs text-white/60 mt-2 mb-1">
-                            More Options
-                          </div>
-                          {metamaskQuotes.success.map((quote: any) => (
-                            <button
-                              key={quote.provider}
-                              onClick={() => handleBuyClick(quote.provider)}
-                              className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
-                            >
-                              <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                  <img
-                                    src={`https://on-ramp-cache.api.cx.metamask.io${quote.providerInfo.logos.dark}`}
-                                    className="w-8 h-8 object-contain"
-                                    alt=""
-                                  />
-                                  <div>
-                                    <div className="font-semibold">
-                                      {quote.providerInfo.name}
-                                    </div>
-                                    <div className="text-xs text-white/60">
-                                      {quote.quote.amountOut.toFixed(2)}{" "}
-                                      {quote.quote.crypto.symbol}
-                                    </div>
-                                  </div>
+                  {(metamaskQuotes?.success || [])
+                    // Sort by lowest fees taken (i.e., highest amountOut)
+                    .sort((a, b) => b.quote.amountOut - a.quote.amountOut)
+                    .map((quote) => {
+                      const REAL_FEE =
+                        quote.quote.amountIn - quote.quote.amountOut
+
+                      return (
+                        <button
+                          key={`mm-quote-${quote.provider}`}
+                          onClick={() => handleBuyClick(quote.provider as any)}
+                          className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
+                        >
+                          <div className="flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                              <ProviderIcon
+                                seed={quote.provider}
+                                nameCharacter={quote.providerInfo.name.charAt(
+                                  0
+                                )}
+                              />
+                              <div>
+                                <div className="font-semibold">
+                                  {quote.providerInfo.name}
                                 </div>
-                                <div className="text-right">
-                                  <div className="text-sm font-semibold">
-                                    ${quote.quote.amountIn}
-                                  </div>
-                                  <div className="text-xs text-white/60">
-                                    Fee: ${quote.quote.providerFee.toFixed(2)}
-                                  </div>
+                                <div className="text-xs text-white/60">
+                                  {quote.quote.amountOut.toFixed(2)}{" "}
+                                  {quote.quote.crypto.symbol}
                                 </div>
                               </div>
-                            </button>
-                          ))}
-                        </>
-                      )}
-                  </div>
-
-                  {isLoading && (
-                    <div className="text-center text-sm text-white/60">
-                      Loading providers...
-                    </div>
-                  )}
-                </>
-              )}
-
-              {method === "world" && (
-                <div className="flex-1 flex items-center justify-center">
-                  <div className="text-center text-white opacity-60">
-                    <TbWorld className="text-4xl mx-auto mb-4" />
-                    <p>World Chain deposit coming soon</p>
-                    <p className="text-xs mt-2">
-                      Deposit WLD/USDC via Uniswap pool
-                    </p>
-                  </div>
+                            </div>
+                            <div className="text-right">
+                              <div className="text-sm font-semibold">
+                                ${quote.quote.amountIn}
+                              </div>
+                              <div className="text-xs text-white/60">
+                                Fee: ${REAL_FEE.toFixed(2)}
+                              </div>
+                            </div>
+                          </div>
+                        </button>
+                      )
+                    })}
                 </div>
-              )}
+              )
+            ) : (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center text-white opacity-60">
+                  <TbWorld className="text-4xl mx-auto mb-4" />
+                  <p>World Chain deposit coming soon</p>
+                  <p className="text-xs mt-2">
+                    Deposit WLD/USDC via Uniswap pool
+                  </p>
+                </div>
+              </div>
+            ))}
 
-              <Button variant="secondary" onClick={() => setStep("method")}>
-                Go Back
-              </Button>
-            </>
+          {step !== "amount" && (
+            <Button
+              variant="secondary"
+              onClick={() => {
+                if (step === "method") {
+                  setAmount("")
+                  return setStep("amount")
+                }
+
+                if (step === "provider") {
+                  return setStep("method")
+                }
+              }}
+            >
+              Go Back
+            </Button>
           )}
         </div>
       </DrawerContent>
@@ -352,7 +344,7 @@ function MethodOption({
   return (
     <button
       onClick={onClick}
-      className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left group"
+      className="w-full p-3 rounded-xl bg-white/5 border border-white/5 hover:bg-white/7 transition-colors text-left group"
     >
       <div className="flex items-center gap-4">
         <div className="size-12 rounded-lg bg-white/5 grid place-items-center group-hover:bg-white/10 transition-colors">
@@ -364,5 +356,26 @@ function MethodOption({
         </div>
       </div>
     </button>
+  )
+}
+
+function ProviderIcon({
+  seed,
+  nameCharacter,
+}: {
+  seed: string
+  nameCharacter: string
+}) {
+  const bgColor = `hsl(${
+    Array.from(seed).reduce((acc, char) => acc + char.charCodeAt(0), 0) % 360
+  }, 50%, 50%)`
+
+  return (
+    <figure
+      className="size-8 rounded grid place-items-center font-bold text-lg"
+      style={{ backgroundColor: bgColor }}
+    >
+      {nameCharacter}
+    </figure>
   )
 }
