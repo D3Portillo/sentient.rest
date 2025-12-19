@@ -16,7 +16,7 @@ import {
 
 import { useSentientWallet } from "@/lib/wallets"
 import { getMiniAppActionLink } from "@/lib/world"
-import { jsonify } from "@/lib/utils"
+import { cn, jsonify } from "@/lib/utils"
 
 import { TOKEN_USDC } from "@/lib/registry"
 import { IoCard, IoSwapHorizontal } from "react-icons/io5"
@@ -35,7 +35,7 @@ export const useTopUpModal = () => {
 }
 
 const MIN_MM_DEPOSIT = 5
-const MIN_DEPOSIT_USD = 1
+const MIN_DEPOSIT_USD = 0.5
 
 type DepositMethod = "card" | "world" | "cross-chain"
 type FlowStep = "amount" | "method" | "provider"
@@ -44,7 +44,7 @@ export default function DrawerTopUp() {
   const { open, setOpen } = useTopUpModal()
   const { wallet } = useSentientWallet()
   const [amount, setAmount] = useState("")
-  const [debouncedAmount, setDebouncedAmount] = useState("")
+  const [debouncedAmount, setDebouncedAmount] = useState(0)
   const [step, setStep] = useState<FlowStep>("amount")
   const [method, setMethod] = useState<DepositMethod | null>(null)
 
@@ -53,8 +53,10 @@ export default function DrawerTopUp() {
 
   useEffect(() => {
     const timer = setTimeout(() => {
-      setDebouncedAmount(amount)
-    }, 500)
+      const formattedAmount = parseFloat(amount || "0")
+      setDebouncedAmount(Number.isFinite(formattedAmount) ? formattedAmount : 0)
+    }, 300)
+
     return () => clearTimeout(timer)
   }, [amount])
 
@@ -67,10 +69,7 @@ export default function DrawerTopUp() {
   }, [open])
 
   const { data: metamaskQuotes = null, isLoading } = useSWR(
-    EVM_ADDRESS &&
-      parseFloat(debouncedAmount) >= MIN_MM_DEPOSIT &&
-      method === "card" &&
-      step === "provider"
+    EVM_ADDRESS && method === "card" && step === "provider"
       ? `quote.mm.${EVM_ADDRESS}.${REGION}.${debouncedAmount}`
       : null,
     async () => {
@@ -84,43 +83,6 @@ export default function DrawerTopUp() {
     }
   )
 
-  const processBuyAssets = async () => {
-    const req = await fetch(`/api/quotes`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        purchaseCurrency: "USDC",
-        destinationNetwork: "base",
-        destinationAddress: EVM_ADDRESS!,
-        paymentAmount: "10",
-        paymentMethod: "CARD",
-      } satisfies {
-        purchaseCurrency: "USDC" | "USDT" | "ETH"
-        destinationNetwork:
-          | "base"
-          | "ethereum"
-          | "polygon"
-          | "arbitrum"
-          | "optimism"
-        destinationAddress: string
-        paymentAmount?: string
-        paymentCurrency?: "USD"
-        paymentMethod?: "CARD"
-        country?: string
-        subdivision?: string
-        redirectUrl?: string
-        clientIp?: string
-        partnerUserRef?: string
-      }),
-    })
-    const data = await req.json()
-
-    console.debug({ data })
-    window.open(data.session.onrampUrl, "_blank", "noopener,noreferrer")
-  }
-
   const handleBuyClick = async (
     provider: MetamaskQuoteLinkRequest["provider"]
   ) => {
@@ -133,7 +95,7 @@ export default function DrawerTopUp() {
         walletAddress: EVM_ADDRESS,
         provider,
         region: REGION,
-        amount: debouncedAmount,
+        amount: `${debouncedAmount}`,
       } satisfies MetamaskQuoteLinkRequest),
     })
 
@@ -150,7 +112,7 @@ export default function DrawerTopUp() {
       params: {
         toAddress: EVM_ADDRESS!,
         toToken: TOKEN_USDC.chains.WORLD?.address!,
-        amountUsd: debouncedAmount,
+        amountUsd: `${debouncedAmount}`,
       },
     })
 
@@ -197,7 +159,13 @@ export default function DrawerTopUp() {
               </div>
               <Button
                 onClick={handleAmountContinue}
-                disabled={!amount || parseFloat(amount) < MIN_DEPOSIT_USD}
+                className={cn(
+                  Number(amount) < MIN_DEPOSIT_USD
+                    ? "opacity-0"
+                    : "opacity-100",
+                  "transition-opacity"
+                )}
+                disabled={debouncedAmount < MIN_DEPOSIT_USD}
               >
                 Continue
               </Button>
@@ -206,12 +174,15 @@ export default function DrawerTopUp() {
 
           {step === "method" && (
             <div className="flex pt-2 flex-col gap-3 flex-1">
-              <MethodOption
-                icon={<IoCard className="text-2xl" />}
-                title="Credit/Debit Card"
-                description="Use credit/debit card to top-up"
-                onClick={() => handleMethodSelect("card")}
-              />
+              {debouncedAmount >= MIN_MM_DEPOSIT && (
+                <MethodOption
+                  icon={<IoCard className="text-2xl" />}
+                  title="Credit/Debit Card"
+                  description="Use credit/debit card to top-up"
+                  onClick={() => handleMethodSelect("card")}
+                />
+              )}
+
               <MethodOption
                 icon={<TbWorld className="text-2xl" />}
                 title="World Deposit"
@@ -224,6 +195,20 @@ export default function DrawerTopUp() {
                 description="Deposit via other chains (DaimoPay)"
                 onClick={() => handleMethodSelect("cross-chain")}
               />
+
+              {debouncedAmount < MIN_MM_DEPOSIT && (
+                <div className="flex justify-center">
+                  <button
+                    onClick={() => {
+                      setStep("amount")
+                      setAmount(`${MIN_MM_DEPOSIT}`)
+                    }}
+                    className="text-white/60 mt-6 text-xs text-center"
+                  >
+                    Min. Card Deposit: ${MIN_MM_DEPOSIT}
+                  </button>
+                </div>
+              )}
             </div>
           )}
 
@@ -235,21 +220,6 @@ export default function DrawerTopUp() {
                 </div>
               ) : (
                 <div className="flex -mx-4 px-4 flex-col gap-2 flex-1 overflow-auto">
-                  <button
-                    onClick={processBuyAssets}
-                    className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
-                  >
-                    <div className="flex items-center gap-3">
-                      <ProviderIcon seed="coinbase-pay" nameCharacter="C" />
-                      <div className="flex-1">
-                        <div className="font-semibold">Coinbase Pay</div>
-                        <div className="text-xs text-white/60">
-                          Fast & trusted
-                        </div>
-                      </div>
-                    </div>
-                  </button>
-
                   {(metamaskQuotes?.success || [])
                     // Sort by lowest fees taken (i.e., highest amountOut)
                     .sort((a, b) => b.quote.amountOut - a.quote.amountOut)

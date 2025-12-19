@@ -251,7 +251,7 @@ function PinInput({
         />
       </div>
 
-      <section className="flex relative z-1 text-center flex-col items-center justify-center">
+      <section className="flex w-full relative z-1 text-center flex-col items-center justify-center">
         <figure
           className={cn(
             "size-20 border-2 rounded-2xl bg-linear-to-br to-white/15 grid place-items-center",

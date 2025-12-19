@@ -66,7 +66,7 @@ export function NumpadInput({
         ) : (
           // Amount display
           <div className="text-center relative z-1">
-            <span className="text-4xl font-semibold tabular-nums">
+            <span className="text-5xl font-bold tabular-nums">
               ${value || placeholder}
             </span>
           </div>
