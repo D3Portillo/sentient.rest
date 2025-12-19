@@ -79,9 +79,6 @@ export function NumpadInput({
 
       {/* Numpad */}
       <div className="relative w-full">
-        {/* Gradient fade */}
-        <div className="absolute inset-x-0 -top-12 h-12 bg-linear-to-b from-black/0 to-black pointer-events-none" />
-
         <div className="grid grid-cols-3 w-full">
           {[1, 2, 3, 4, 5, 6, 7, 8, 9].map((num) => (
             <PadButton key={num} onTap={() => handleNumpadPress(num)}>
