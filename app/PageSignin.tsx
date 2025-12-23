@@ -156,6 +156,9 @@ export default function PageSignin() {
   useEffect(() => {
     if (isConnected) {
       setPinMode(WALLET ? "unlock" : "create")
+    } else {
+      // Revert to initial state when not connected
+      setPinMode(null)
     }
   }, [isConnected, WALLET?.address])
 
