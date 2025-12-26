@@ -16,13 +16,14 @@ import {
 
 import { useSentientWallet } from "@/lib/wallets"
 import { getMiniAppActionLink } from "@/lib/world"
-import { cn, jsonify } from "@/lib/utils"
+import { jsonify } from "@/lib/utils"
 
 import { TOKEN_USDC } from "@/lib/registry"
 import { IoCard, IoSwapHorizontal } from "react-icons/io5"
 import { TbWorld } from "react-icons/tb"
 
 import Button from "./Button"
+import { toast } from "sonner"
 
 const atomTopUpModalOpen = atom(false)
 export const useTopUpModal = () => {
@@ -35,7 +36,7 @@ export const useTopUpModal = () => {
 }
 
 const MIN_MM_DEPOSIT = 5
-const MIN_DEPOSIT_USD = 0.5
+const MIN_DEPOSIT_USD = 0.1
 
 type DepositMethod = "card" | "world" | "cross-chain"
 type FlowStep = "amount" | "method" | "provider"
@@ -50,6 +51,7 @@ export default function DrawerTopUp() {
 
   const REGION = "us-ca"
   const EVM_ADDRESS = wallet?.evm?.address
+  const isValidDeposit = Number(amount) >= MIN_DEPOSIT_USD
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -120,9 +122,8 @@ export default function DrawerTopUp() {
   }
 
   const handleAmountContinue = () => {
-    const value = parseFloat(amount)
-    if (!value || value < MIN_DEPOSIT_USD) return
-    setStep("method")
+    if (isValidDeposit) return setStep("method")
+    toast.error(`Min. deposit: $${MIN_DEPOSIT_USD}`)
   }
 
   const handleMethodSelect = (selectedMethod: DepositMethod) => {
@@ -138,10 +139,11 @@ export default function DrawerTopUp() {
   return (
     <Drawer open={open} onOpenChange={setOpen}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
+        <div className="bg-linear-to-br pointer-events-none inset-0 absolute from-sw-yellow/0 to-sw-yellow/7" />
         <DrawerHeader className="pb-6">
           <DrawerTitle>
             {step === "amount" && "Add Funds"}
-            {step === "method" && `Add Funds ($${amount})`}
+            {step === "method" && `Add Funds ($${debouncedAmount.toFixed(2)})`}
             {step === "provider" && "Select Provider"}
           </DrawerTitle>
         </DrawerHeader>
@@ -157,18 +159,7 @@ export default function DrawerTopUp() {
                   placeholder="0"
                 />
               </div>
-              <Button
-                onClick={handleAmountContinue}
-                className={cn(
-                  Number(amount) < MIN_DEPOSIT_USD
-                    ? "opacity-0"
-                    : "opacity-100",
-                  "transition-opacity"
-                )}
-                disabled={debouncedAmount < MIN_DEPOSIT_USD}
-              >
-                Continue
-              </Button>
+              <Button onClick={handleAmountContinue}>Continue</Button>
             </Fragment>
           )}
 
@@ -231,7 +222,7 @@ export default function DrawerTopUp() {
                         <button
                           key={`mm-quote-${quote.provider}`}
                           onClick={() => handleBuyClick(quote.provider as any)}
-                          className="w-full p-4 rounded-lg bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
+                          className="w-full last:mb-4 p-2.5 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors text-left"
                         >
                           <div className="flex items-center justify-between">
                             <div className="flex items-center gap-3">
@@ -342,7 +333,7 @@ function ProviderIcon({
 
   return (
     <figure
-      className="size-8 rounded grid place-items-center font-bold text-lg"
+      className="size-9 rounded-lg grid place-items-center font-bold text-lg"
       style={{ backgroundColor: bgColor }}
     >
       {nameCharacter}
