@@ -16,6 +16,7 @@ import {
 
 import { useSentientWallet } from "@/lib/wallets"
 import { getMiniAppActionLink } from "@/lib/world"
+import { localizeNumber } from "@/lib/numbers"
 import { jsonify } from "@/lib/utils"
 
 import { TOKEN_USDC } from "@/lib/registry"
@@ -143,7 +144,8 @@ export default function DrawerTopUp() {
         <DrawerHeader className="pb-6">
           <DrawerTitle>
             {step === "amount" && "Add Funds"}
-            {step === "method" && `Add Funds ($${debouncedAmount.toFixed(2)})`}
+            {step === "method" &&
+              `Add Funds ($${localizeNumber(debouncedAmount)})`}
             {step === "provider" && "Select Provider"}
           </DrawerTitle>
         </DrawerHeader>

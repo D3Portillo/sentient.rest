@@ -4,7 +4,7 @@ import { Provider } from "fuels"
 
 import { ZERO } from "./constants"
 
-type BalanceResult = {
+export type BalanceResult = {
   address: string
   decimals: number
   balance: bigint

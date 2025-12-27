@@ -75,7 +75,8 @@ type TokenConfig = {
   >
 }
 
-const TOKENS: Record<string, TokenConfig> = {
+type DepositToken = "WLD" | "USDC" | "USDT" | "SOL" | "FUEL" | "ETH"
+export const TOKENS: Record<DepositToken, TokenConfig> = {
   WLD: {
     symbol: "WLD",
     name: "Worldcoin",
@@ -156,7 +157,8 @@ const TOKENS: Record<string, TokenConfig> = {
     name: "Solana",
     chains: {
       SOLANA: {
-        address: "So11111111111111111111111111111111111111111",
+        // Using Wrapped SOL address
+        address: "So11111111111111111111111111111111111111112",
         isNative: true,
         decimals: 9,
       },
@@ -179,14 +181,14 @@ const TOKENS: Record<string, TokenConfig> = {
     symbol: "ETH",
     name: "Ethereum",
     chains: {
-      // Native ETH (ZERO addresses)
+      // ZeroAddress, or WETH for price feeds
       ARBITRUM: {
         address: zeroAddress,
         isNative: true,
         decimals: 18,
       },
       OPTIMISM: {
-        address: zeroAddress,
+        address: "0x4200000000000000000000000000000000000006",
         isNative: true,
         decimals: 18,
       },
@@ -219,7 +221,7 @@ export const getTokensForChain = (chain: DepositChain) => {
   return TOKENS_LIST.filter((token) => token.chains?.[chain])
 }
 
-export const getChainsForToken = (tokenSymbol: string) => {
+export const getChainsForToken = (tokenSymbol: DepositToken) => {
   const token = TOKENS[tokenSymbol]
   if (!token) return []
 

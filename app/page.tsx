@@ -9,11 +9,14 @@ import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 import { FaArrowsRotate } from "react-icons/fa6"
 
-import { isDevEnv } from "@/lib/env"
 import { useWithdrawModal } from "@/components/DrawerWithdraw"
 import { useTopUpModal } from "@/components/DrawerTopUp"
 import { useDepositModal } from "@/components/DrawerDeposit"
 import { useSentientWallet } from "@/lib/wallets"
+import { useTokenPrices, useAccountBalances } from "@/lib/prices"
+
+import { isDevEnv } from "@/lib/env"
+import { localizeNumber } from "@/lib/numbers"
 
 import DialogAddress from "@/components/DialogAddress"
 import PageSignin from "./PageSignin"
@@ -25,6 +28,21 @@ export default function Home() {
   const { toggle: toggleTopUp } = useTopUpModal()
   const { isConnected } = useWorldAuth()
   const { wallet } = useSentientWallet()
+
+  const { balances } = useAccountBalances({
+    evm: wallet?.evm.address,
+    sol: wallet?.solana.address,
+    fuel: wallet?.fuel.address,
+  })
+
+  const { getTokenPrice } = useTokenPrices()
+
+  const allBalancesInUSD = Object.values(balances || {})
+    .flat()
+    .reduce((acc, { formattedBalance, symbol: tokenSymbol }) => {
+      if (!tokenSymbol) return acc
+      return acc + getTokenPrice(tokenSymbol) * Number(formattedBalance)
+    }, 0)
 
   // Show when not conencted or no Sentient wallet created
   const showConnectState = (!isDevEnv() && !isConnected) || !wallet
@@ -42,7 +60,9 @@ export default function Home() {
 
       {/* Balance Section */}
       <section className="flex-1 flex flex-col items-center justify-start pt-16">
-        <h1 className="text-6xl font-bold mb-4">$0.2397</h1>
+        <h1 className="text-6xl font-bold mb-4">
+          ${localizeNumber(allBalancesInUSD)}
+        </h1>
         <div className="flex items-center gap-4">
           <button className="bg-sw-green/20 hover:bg-sw-green/30 backdrop-blur-sm rounded-full pl-3 pr-2 py-1 flex items-center gap-2 transition-colors">
             <span className="text-sw-green font-medium">$0 earned</span>
