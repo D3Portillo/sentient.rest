@@ -1,15 +1,49 @@
 import { zeroAddress } from "viem"
+import { arbitrum, base, optimism, worldchain } from "viem/chains"
 
 const DEPOSIT_CHAINS = {
   WORLD: {
     name: "Worldchain",
     iconImage: "/chains/world.png",
+    rpcURL: "https://worldchain.drpc.org",
+    chainType: "EVM",
+    chainConfig: worldchain,
   },
-  BASE: { name: "Base", iconImage: "/chains/base.png" },
-  ARBITRUM: { name: "Arbitrum", iconImage: "/chains/arbitrum.png" },
-  OPTIMISM: { name: "Optimism", iconImage: "/chains/optimism.png" },
-  FUEL: { name: "Fuel", iconImage: "/chains/fuel.png" },
-  SOLANA: { name: "Solana", iconImage: "/chains/solana.png" },
+  BASE: {
+    name: "Base",
+    iconImage: "/chains/base.png",
+    rpcURL: "https://base.meowrpc.com",
+    chainType: "EVM",
+    chainConfig: base,
+  },
+  ARBITRUM: {
+    name: "Arbitrum",
+    iconImage: "/chains/arbitrum.png",
+    rpcURL: "https://arbitrum.drpc.org",
+    chainType: "EVM",
+    chainConfig: arbitrum,
+  },
+  OPTIMISM: {
+    name: "Optimism",
+    iconImage: "/chains/optimism.png",
+    rpcURL: "https://0xrpc.io/op",
+    chainType: "EVM",
+    chainConfig: optimism,
+  },
+  FUEL: {
+    name: "Fuel",
+    iconImage: "/chains/fuel.png",
+    rpcURL: "https://testnet.fuel.network/v1/graphql",
+    chainType: "FUEL",
+    chainConfig: null,
+  },
+  SOLANA: {
+    name: "Solana",
+    iconImage: "/chains/solana.png",
+    rpcURL: "https://api.mainnet.solana.com",
+    chainType: "SOLANA",
+    chainConfig: null,
+  },
 } as const
 
 export type DepositChain = keyof typeof DEPOSIT_CHAINS
