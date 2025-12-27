@@ -1,6 +1,6 @@
 import { Chain, createPublicClient, erc20Abi, formatUnits, http } from "viem"
-import { Provider } from "fuels"
 import { address, createSolanaRpc } from "@solana/kit"
+import { Provider } from "fuels"
 
 import { ZERO } from "./constants"
 
@@ -8,6 +8,7 @@ type BalanceResult = {
   address: string
   decimals: number
   balance: bigint
+  symbol?: string
   formattedBalance: string
 }
 
@@ -20,7 +21,12 @@ export const fetchTokenBalances = async (
     chainConfig?: Chain | null
   },
   ownerAddress: string,
-  tokens: { address: string; symbol?: string; decimals: number }[]
+  tokens: {
+    address: string
+    symbol?: string
+    decimals: number
+    isNative?: boolean
+  }[]
 ): Promise<BalanceResult[]> => {
   if (rpcData.chainType === "EVM") {
     const client = createPublicClient({
@@ -37,15 +43,23 @@ export const fetchTokenBalances = async (
       })),
     })
 
-    return tokens.map(({ address, decimals }, index) => {
-      const balance = BigInt(result[index]?.result || ZERO)
-      return {
-        address,
-        decimals,
-        balance,
-        formattedBalance: formatUnits(balance, decimals),
-      }
-    }) as BalanceResult[]
+    return (await Promise.all(
+      tokens.map(async ({ address, decimals, symbol, isNative }, index) => {
+        const balance = isNative
+          ? await client.getBalance({
+              address: ownerAddress as any,
+            })
+          : BigInt(result[index]?.result || ZERO)
+
+        return {
+          address,
+          decimals,
+          balance,
+          symbol,
+          formattedBalance: formatUnits(balance, decimals),
+        }
+      })
+    )) as BalanceResult[]
   }
 
   if (rpcData.chainType === "SOLANA") {
@@ -53,32 +67,50 @@ export const fetchTokenBalances = async (
     const owner = address(ownerAddress)
 
     return await Promise.all(
-      tokens.map(async ({ address: tokenAddress, decimals }) => {
-        const USDC_MINT = address("EPjFWdd5AufqSSqeM2q9GQ6r6tZL1k5Y2dZ9iYkX2x5")
+      tokens.map(
+        async ({ address: tokenAddress, decimals, symbol, isNative }) => {
+          let balance = ZERO
 
-        const res = await rpc
-          .getTokenAccountsByOwner(
-            owner,
-            {
-              mint: USDC_MINT,
-            },
-            {
-              encoding: "jsonParsed",
-            }
-          )
-          .send()
+          if (isNative) {
+            const res = await rpc.getBalance(owner).send()
+            if (res?.value) balance = BigInt(res.value)
+          } else {
+            try {
+              const tokenData = await rpc
+                .getAccountInfo(address(tokenAddress))
+                .send()
 
-        const result =
-          res?.value?.at(0)?.account?.data?.parsed?.info?.tokenAmount?.amount
+              const programId = tokenData.value?.owner
+              if (!programId) throw new Error("ProgramIdNotFound")
+              const res = await rpc
+                .getTokenAccountsByOwner(
+                  owner,
+                  {
+                    programId,
+                    mint: address(tokenAddress),
+                  },
+                  {
+                    encoding: "jsonParsed",
+                  }
+                )
+                .send()
 
-        const balance = BigInt(result || ZERO)
-        return {
-          address: tokenAddress,
-          formattedBalance: formatUnits(balance, decimals),
-          decimals,
-          balance,
-        } satisfies BalanceResult
-      })
+              const result =
+                res?.value?.at(0)?.account?.data?.parsed?.info?.tokenAmount
+                  ?.amount
+              if (result) balance = BigInt(result)
+            } catch (_) {}
+          }
+
+          return {
+            address: tokenAddress,
+            symbol,
+            formattedBalance: formatUnits(balance, decimals),
+            decimals,
+            balance,
+          } satisfies BalanceResult
+        }
+      )
     )
   }
 
@@ -86,12 +118,13 @@ export const fetchTokenBalances = async (
 
   // Else we assume FUEL
   return await Promise.all(
-    tokens.map(async ({ address, decimals }) => {
+    tokens.map(async ({ address, decimals, symbol }) => {
       const balance = await fuelProvider.getBalance(ownerAddress, address)
       const balanceBigInt = BigInt(balance.toString())
       return {
         address,
         decimals,
+        symbol,
         balance: balanceBigInt,
         formattedBalance: formatUnits(balanceBigInt, decimals),
       } satisfies BalanceResult

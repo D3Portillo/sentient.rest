@@ -33,14 +33,15 @@ const DEPOSIT_CHAINS = {
   FUEL: {
     name: "Fuel",
     iconImage: "/chains/fuel.png",
-    rpcURL: "https://testnet.fuel.network/v1/graphql",
+    rpcURL: "https://mainnet.fuel.network/v1/graphql",
     chainType: "FUEL",
     chainConfig: null,
   },
   SOLANA: {
     name: "Solana",
     iconImage: "/chains/solana.png",
-    rpcURL: "https://api.mainnet.solana.com",
+    rpcURL:
+      "https://solana-mainnet.g.alchemy.com/v2/TydhRO71t-iaLkFdNDoQ_eIcd9TgKv0Q",
     chainType: "SOLANA",
     chainConfig: null,
   },
@@ -68,6 +69,7 @@ type TokenConfig = {
       {
         address: string
         decimals: number
+        isNative?: boolean
       }
     >
   >
@@ -155,6 +157,7 @@ const TOKENS: Record<string, TokenConfig> = {
     chains: {
       SOLANA: {
         address: "So11111111111111111111111111111111111111111",
+        isNative: true,
         decimals: 9,
       },
     },
@@ -179,22 +182,28 @@ const TOKENS: Record<string, TokenConfig> = {
       // Native ETH (ZERO addresses)
       ARBITRUM: {
         address: zeroAddress,
+        isNative: true,
         decimals: 18,
       },
       OPTIMISM: {
         address: zeroAddress,
+        isNative: true,
         decimals: 18,
       },
       BASE: {
         address: zeroAddress,
+        isNative: true,
         decimals: 18,
       },
       FUEL: {
-        address: zeroAddress,
+        address:
+          "0xf8f8b6283d7fa5b672b530cbb84fcccb4ff8dc40f8176ef4544ddb1f1952ad07",
+        isNative: true,
         decimals: 9,
       },
       WORLD: {
         address: zeroAddress,
+        isNative: true,
         decimals: 18,
       },
     },
