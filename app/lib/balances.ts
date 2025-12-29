@@ -13,6 +13,34 @@ export type BalanceResult = {
 }
 
 export type ChainType = "EVM" | "SOLANA" | "FUEL"
+type WalletClient<T> = T extends "EVM"
+  ? ReturnType<typeof createPublicClient>
+  : T extends "SOLANA"
+  ? ReturnType<typeof createSolanaRpc>
+  : Provider
+
+const clientsCache = new Map<string, any>()
+const getClient = <T extends ChainType>(
+  type: T,
+  rpcURL: string,
+  chainConfig?: Chain | null
+): WalletClient<T> => {
+  const KEY = `${type}:${rpcURL}`
+  const cachedClient = clientsCache.get(KEY)
+  if (cachedClient) return cachedClient
+
+  const client: any =
+    type === "SOLANA"
+      ? createSolanaRpc(rpcURL)
+      : type === "EVM"
+      ? createPublicClient({
+          chain: chainConfig || undefined,
+          transport: http(rpcURL),
+        })
+      : new Provider(rpcURL)
+
+  return clientsCache.set(KEY, client), client
+}
 
 export const fetchTokenBalances = async (
   rpcData: {
@@ -29,10 +57,7 @@ export const fetchTokenBalances = async (
   }[]
 ): Promise<BalanceResult[]> => {
   if (rpcData.chainType === "EVM") {
-    const client = createPublicClient({
-      chain: rpcData.chainConfig ?? undefined,
-      transport: http(rpcData.rpcURL),
-    })
+    const client = getClient("EVM", rpcData.rpcURL, rpcData.chainConfig)
 
     const result = await client.multicall({
       contracts: tokens.map((token) => ({
@@ -63,7 +88,7 @@ export const fetchTokenBalances = async (
   }
 
   if (rpcData.chainType === "SOLANA") {
-    const rpc = createSolanaRpc(rpcData.rpcURL)
+    const rpc = getClient("SOLANA", rpcData.rpcURL)
     const owner = address(ownerAddress)
 
     return await Promise.all(
@@ -114,7 +139,7 @@ export const fetchTokenBalances = async (
     )
   }
 
-  const fuelProvider = new Provider(rpcData.rpcURL)
+  const fuelProvider = getClient("FUEL", rpcData.rpcURL)
 
   // Else we assume FUEL
   return await Promise.all(

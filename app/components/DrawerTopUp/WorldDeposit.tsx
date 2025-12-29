@@ -62,6 +62,10 @@ export default function WorldDeposit({ initialAmount = "" }) {
         USDC,
         WLD,
       }
+    },
+    {
+      keepPreviousData: true,
+      refreshInterval: 5_000, // every 5s
     }
   )
 
@@ -85,7 +89,7 @@ export default function WorldDeposit({ initialAmount = "" }) {
       paymentDescription: `SentientDeposit(${SYMBOL}): ${amount}`,
       recipientAddress: EVM_WALLET,
       token: isWLDDeposit ? "WLD" : "USDC",
-      amount: BALANCE,
+      amount: Number(amount),
     })
   }
 
