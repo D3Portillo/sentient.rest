@@ -13,6 +13,7 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from "@/components/ui/drawer"
+import Button from "@/components/Button"
 
 import { useSentientWallet } from "@/lib/wallets"
 import { getMiniAppActionLink } from "@/lib/world"
@@ -22,9 +23,7 @@ import { jsonify } from "@/lib/utils"
 import { TOKEN_USDC } from "@/lib/registry"
 import { IoCard, IoSwapHorizontal } from "react-icons/io5"
 import { TbWorld } from "react-icons/tb"
-
-import Button from "./Button"
-import { toast } from "sonner"
+import WorldDeposit from "./WorldDeposit"
 
 const atomTopUpModalOpen = atom(false)
 export const useTopUpModal = () => {
@@ -37,7 +36,6 @@ export const useTopUpModal = () => {
 }
 
 const MIN_MM_DEPOSIT = 5
-const MIN_DEPOSIT_USD = 0.1
 
 type DepositMethod = "card" | "world" | "cross-chain"
 type FlowStep = "amount" | "method" | "provider"
@@ -52,7 +50,6 @@ export default function DrawerTopUp() {
 
   const REGION = "us-ca"
   const EVM_ADDRESS = wallet?.evm?.address
-  const isValidDeposit = Number(amount) >= MIN_DEPOSIT_USD
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -123,8 +120,8 @@ export default function DrawerTopUp() {
   }
 
   const handleAmountContinue = () => {
-    if (isValidDeposit) return setStep("method")
-    toast.error(`Min. deposit: $${MIN_DEPOSIT_USD}`)
+    // Allow empty amounts so user sees cross-chain + WLD deposit options
+    setStep("method")
   }
 
   const handleMethodSelect = (selectedMethod: DepositMethod) => {
@@ -145,8 +142,12 @@ export default function DrawerTopUp() {
           <DrawerTitle>
             {step === "amount" && "Add Funds"}
             {step === "method" &&
-              `Add Funds ($${localizeNumber(debouncedAmount)})`}
-            {step === "provider" && "Select Provider"}
+              (debouncedAmount > 0
+                ? `Add Funds ($${localizeNumber(debouncedAmount)})`
+                : "Add Funds (Method)")}
+
+            {step === "provider" &&
+              (method === "world" ? "World Deposit" : "Select Provider")}
           </DrawerTitle>
         </DrawerHeader>
 
@@ -182,12 +183,16 @@ export default function DrawerTopUp() {
                 description="Deposit WLD/USDC via World App"
                 onClick={() => handleMethodSelect("world")}
               />
-              <MethodOption
-                icon={<IoSwapHorizontal className="text-2xl" />}
-                title="Cross-Chain Bridge"
-                description="Deposit via other chains (DaimoPay)"
-                onClick={() => handleMethodSelect("cross-chain")}
-              />
+
+              {debouncedAmount >= 0.05 && (
+                // Show cross-chain option when we at least something to transfer
+                <MethodOption
+                  icon={<IoSwapHorizontal className="text-2xl" />}
+                  title="Cross-Chain Bridge"
+                  description="Deposit via other chains (DaimoPay)"
+                  onClick={() => handleMethodSelect("cross-chain")}
+                />
+              )}
 
               {debouncedAmount < MIN_MM_DEPOSIT && (
                 <div className="flex justify-center">
@@ -196,7 +201,7 @@ export default function DrawerTopUp() {
                       setStep("amount")
                       setAmount(`${MIN_MM_DEPOSIT}`)
                     }}
-                    className="text-white/60 mt-6 text-xs text-center"
+                    className="text-white/60 py-2 mt-4 text-xs text-center"
                   >
                     Min. Card Deposit: ${MIN_MM_DEPOSIT}
                   </button>
@@ -259,15 +264,7 @@ export default function DrawerTopUp() {
                 </div>
               )
             ) : (
-              <div className="flex-1 flex items-center justify-center">
-                <div className="text-center text-white opacity-60">
-                  <TbWorld className="text-4xl mx-auto mb-4" />
-                  <p>World Chain deposit coming soon</p>
-                  <p className="text-xs mt-2">
-                    Deposit WLD/USDC via Uniswap pool
-                  </p>
-                </div>
-              </div>
+              <WorldDeposit initialAmount={debouncedAmount.toString()} />
             ))}
 
           {step !== "amount" && (

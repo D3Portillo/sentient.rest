@@ -77,6 +77,31 @@ type TokenConfig = {
 
 type DepositToken = "WLD" | "USDC" | "USDT" | "SOL" | "FUEL" | "ETH"
 export const TOKENS: Record<DepositToken, TokenConfig> = {
+  SOL: {
+    symbol: "SOL",
+    name: "Solana",
+    chains: {
+      SOLANA: {
+        // Using Wrapped SOL address
+        address: "So11111111111111111111111111111111111111112",
+        isNative: true,
+        decimals: 9,
+      },
+    },
+    iconImage: "/tokens/sol.png",
+  },
+  FUEL: {
+    name: "Fuel",
+    symbol: "FUEL",
+    iconImage: "/tokens/fuel.png",
+    chains: {
+      FUEL: {
+        address:
+          "0x1d5d97005e41cae2187a895fd8eab0506111e0e2f3331cd3912c15c24e3c1d82",
+        decimals: 9,
+      },
+    },
+  },
   WLD: {
     symbol: "WLD",
     name: "Worldcoin",
@@ -152,31 +177,7 @@ export const TOKENS: Record<DepositToken, TokenConfig> = {
     },
     iconImage: "/tokens/usdt.png",
   },
-  SOL: {
-    symbol: "SOL",
-    name: "Solana",
-    chains: {
-      SOLANA: {
-        // Using Wrapped SOL address
-        address: "So11111111111111111111111111111111111111112",
-        isNative: true,
-        decimals: 9,
-      },
-    },
-    iconImage: "/tokens/sol.png",
-  },
-  FUEL: {
-    name: "Fuel",
-    symbol: "FUEL",
-    iconImage: "/tokens/fuel.png",
-    chains: {
-      FUEL: {
-        address:
-          "0x1d5d97005e41cae2187a895fd8eab0506111e0e2f3331cd3912c15c24e3c1d82",
-        decimals: 9,
-      },
-    },
-  },
+
   ETH: {
     symbol: "ETH",
     name: "Ethereum",
@@ -214,7 +215,7 @@ export const TOKENS: Record<DepositToken, TokenConfig> = {
 }
 
 export const TOKENS_LIST = Object.values(TOKENS)
-export const TOKEN_WLD = TOKENS_LIST[0]
+export const TOKEN_WLD = TOKENS_LIST.find((t) => t.symbol === "WLD")!
 export const TOKEN_USDC = TOKENS_LIST.find((t) => t.symbol === "USDC")!
 
 export const getTokensForChain = (chain: DepositChain) => {
