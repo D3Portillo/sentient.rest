@@ -6,7 +6,12 @@ export default function PageContainer({
   className,
 }: PropsWithChildren<{ className?: string }>) {
   return (
-    <main className={cn("flex max-w-md mx-auto p-4 flex-col h-dvh", className)}>
+    <main
+      className={cn(
+        "flex overflow-auto max-w-md mx-auto p-4 pb-20 flex-col h-dvh",
+        className
+      )}
+    >
       {children}
     </main>
   )
