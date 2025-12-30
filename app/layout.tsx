@@ -12,6 +12,7 @@ import ErudaProvider from "@/components/ErudaProdiver"
 import DrawerTopUp from "./components/DrawerTopUp"
 import DrawerDeposit from "@/components/DrawerDeposit"
 import WorldProvider from "./WorldProvider"
+import MainLayout from "./MainLayout"
 
 const nextFont = Inter({
   subsets: [],
@@ -62,7 +63,7 @@ export default function RootLayout({
               <DrawerWithdraw />
               <DrawerDeposit />
               <DrawerTopUp />
-              {children}
+              <MainLayout>{children}</MainLayout>
             </SafeInsetProvider>
           </ErudaProvider>
         </WorldProvider>

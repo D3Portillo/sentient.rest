@@ -6,7 +6,7 @@ import { worldchain } from "viem/chains"
 import useSWR from "swr"
 
 import { useSentientWallet } from "@/lib/wallets"
-import { CHAIN_WORLD, getTokensForChain, TOKEN_WLD } from "@/app/lib/registry"
+import { CHAIN_WORLD, getTokensForChain, TOKEN_USDC } from "@/app/lib/registry"
 import {
   Select,
   SelectContent,
@@ -22,7 +22,7 @@ import { executePayment } from "@/lib/payments"
 export default function WorldDeposit({ initialAmount = "" }) {
   const { address, signIn } = useWorldAuth()
 
-  const [selectedToken, setSelectedToken] = useState(TOKEN_WLD)
+  const [selectedToken, setSelectedToken] = useState(TOKEN_USDC)
   const [amount, setAmount] = useState("")
   const { wallet } = useSentientWallet()
 
@@ -32,7 +32,9 @@ export default function WorldDeposit({ initialAmount = "" }) {
   )
 
   useEffect(() => {
+    // Sync to initial amount prop (for presetting from top-up flow)
     setAmount(initialAmount == "0" ? "" : initialAmount)
+    setSelectedToken(TOKEN_USDC)
   }, [initialAmount])
 
   const { data: balances = null } = useSWR(

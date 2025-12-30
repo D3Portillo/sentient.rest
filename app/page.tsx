@@ -1,11 +1,8 @@
 "use client"
 
-import { useWorldAuth } from "@radish-la/world-auth"
-
 import { TbArrowDownLeft, TbArrowUpRight } from "react-icons/tb"
-import { FaCoins, FaArrowUp } from "react-icons/fa"
 import { IoMdMenu } from "react-icons/io"
-import { RiHome3Fill, RiMoneyDollarBoxFill } from "react-icons/ri"
+import { RiMoneyDollarBoxFill } from "react-icons/ri"
 import { IoInformationCircleOutline } from "react-icons/io5"
 import { FaArrowsRotate } from "react-icons/fa6"
 
@@ -15,18 +12,16 @@ import { useDepositModal } from "@/components/DrawerDeposit"
 import { useSentientWallet } from "@/lib/wallets"
 import { useTokenPrices, useAccountBalances } from "@/lib/prices"
 
-import { isDevEnv } from "@/lib/env"
 import { localizeNumber } from "@/lib/numbers"
 
 import DialogAddress from "@/components/DialogAddress"
-import PageSignin from "./PageSignin"
 import PageContainer from "./PageContainer"
 
 export default function Home() {
   const { toggle: toggleWithdraw } = useWithdrawModal()
   const { toggle: toggleDeposit } = useDepositModal()
   const { toggle: toggleTopUp } = useTopUpModal()
-  const { isConnected } = useWorldAuth()
+
   const { wallet } = useSentientWallet()
 
   const { balances } = useAccountBalances({
@@ -43,10 +38,6 @@ export default function Home() {
       if (!tokenSymbol) return acc
       return acc + getTokenPrice(tokenSymbol) * Number(formattedBalance)
     }, 0)
-
-  // Show when not conencted or no Sentient wallet created
-  const showConnectState = (!isDevEnv() && !isConnected) || !wallet
-  if (showConnectState) return <PageSignin />
 
   return (
     <PageContainer>
@@ -134,39 +125,6 @@ export default function Home() {
           </button>
         </div>
       </section>
-
-      {/* Bottom Navigation */}
-      <div className="fixed bottom-0 left-0 right-0">
-        <nav className="flex drop-shadow-[0_-1px_0_rgba(255,255,255,0.1)] relative max-w-md mx-auto items-center justify-around px-4 h-20 pb-safe-bottom bg-black">
-          <div className="size-24 -top-4 pointer-events-none absolute bg-black rounded-full left-1/2 -translate-x-1/2" />
-
-          <button className="grid w-14 place-items-center gap-1">
-            <figure className="size-6 grid place-items-center">
-              <RiHome3Fill className="text-2xl scale-110" />
-            </figure>
-            <span className="text-xs font-medium">Home</span>
-          </button>
-
-          <button
-            onClick={toggleWithdraw}
-            className="flex drop-shadow-[0_0_20px_rgba(255,255,0,0.5)] -top-2 flex-col items-center gap-1 relative"
-          >
-            <div className="size-12 -top-1 bg-sw-yellow text-black rounded-full flex items-center justify-center absolute">
-              <FaArrowUp className="text-xl" />
-            </div>
-            <span className="text-xs px-4 font-medium mt-12 text-yellow-100">
-              Send
-            </span>
-          </button>
-
-          <button className="grid w-14 opacity-60 place-items-center gap-1">
-            <figure className="size-6 grid place-items-center place-content-center">
-              <FaCoins className="text-2xl" />
-            </figure>
-            <span className="text-xs font-medium">Assets</span>
-          </button>
-        </nav>
-      </div>
     </PageContainer>
   )
 }
