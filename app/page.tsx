@@ -16,6 +16,7 @@ import { localizeNumber } from "@/lib/numbers"
 
 import DialogAddress from "@/components/DialogAddress"
 import PageContainer from "./PageContainer"
+import Link from "next/link"
 
 export default function Home() {
   const { toggle: toggleWithdraw } = useWithdrawModal()
@@ -51,9 +52,11 @@ export default function Home() {
 
       {/* Balance Section */}
       <section className="flex-1 flex flex-col items-center justify-start pt-16">
-        <h1 className="text-6xl font-bold mb-4">
-          ${localizeNumber(allBalancesInUSD)}
-        </h1>
+        <Link className="active:scale-98" href="/assets">
+          <h1 className="text-6xl font-bold mb-4">
+            ${localizeNumber(allBalancesInUSD)}
+          </h1>
+        </Link>
         <div className="flex items-center gap-4">
           <button className="bg-sw-green/20 hover:bg-sw-green/30 backdrop-blur-sm rounded-full pl-3 pr-2 py-1 flex items-center gap-2 transition-colors">
             <span className="text-sw-green font-medium">$0 earned</span>

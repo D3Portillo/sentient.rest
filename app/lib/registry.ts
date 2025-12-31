@@ -59,7 +59,7 @@ export const CHAINS_LIST = Object.entries(DEPOSIT_CHAINS).map(
 
 export const CHAIN_WORLD = CHAINS_LIST[0]
 
-type TokenConfig = {
+export type TokenConfig = {
   symbol: string
   name: string
   iconImage: string
@@ -231,4 +231,8 @@ export const getChainsForToken = (tokenSymbol: DepositToken) => {
     if (!chain) throw new Error("InvalidSymbol")
     return chain
   })
+}
+
+export const getTokenBySymbol = (symbol: DepositToken) => {
+  return TOKENS_LIST.find((t) => t.symbol === symbol) || null
 }
