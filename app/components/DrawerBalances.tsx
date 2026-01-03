@@ -4,11 +4,16 @@ import { atom, useAtom } from "jotai"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 
 import { type DepositToken, getChainsForToken } from "@/lib/registry"
+import { cn } from "@/lib/utils"
 import { localizeNumber } from "@/lib/numbers"
 import { useAccountBalances } from "@/lib/prices"
 import { useSentientWallet } from "@/lib/wallets"
+
+import { TbArrowUpRight, TbArrowDownLeft } from "react-icons/tb"
+
+import { useWithdrawModal } from "./DrawerWithdraw"
+import { useDepositModal } from "./DrawerDeposit"
 import Button from "./Button"
-import { cn } from "../lib/utils"
 
 const atomBalanceModal = atom({
   assetSymbol: null as DepositToken | null,
@@ -28,7 +33,10 @@ export const useBalancesModal = () => {
 export default function DrawerBalances() {
   const { wallet } = useSentientWallet()
 
-  const { isOpen, close, assetSymbol } = useBalancesModal()
+  const { toggle: toggleWithdraw } = useWithdrawModal()
+  const { toggle: toggleDeposit } = useDepositModal()
+
+  const { isOpen, close: closeBalancesModal, assetSymbol } = useBalancesModal()
   const { priceFormattedBalances } = useAccountBalances({
     evm: wallet?.evm.address,
     sol: wallet?.solana.address,
@@ -55,13 +63,13 @@ export default function DrawerBalances() {
     .sort(({ balances: a }, { balances: b }) => b.usdValue - a.usdValue)
 
   return (
-    <Drawer open={isOpen} onOpenChange={close}>
+    <Drawer open={isOpen} onOpenChange={closeBalancesModal}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Chain Balances ({assetSymbol})</DrawerTitle>
         </DrawerHeader>
 
-        <section className="mt-2 grow">
+        <section className="mt-2 px-2 grow">
           {chainsWithBalances.map(({ balances, ...chain }) => {
             return (
               <div
@@ -69,10 +77,10 @@ export default function DrawerBalances() {
                 className={cn(
                   "first:border-t border-white/10",
                   "border-b last:border-b-0",
-                  "flex justify-between items-center pr-4 py-3"
+                  "flex gap-4 justify-between items-center pr-4 py-3"
                 )}
               >
-                <nav className="flex items-center gap-4">
+                <div className="flex items-center gap-4">
                   <figure className="size-7 bg-white/15 border border-white/5 rounded-md overflow-hidden">
                     <img
                       src={chain.iconImage}
@@ -81,15 +89,31 @@ export default function DrawerBalances() {
                     />
                   </figure>
 
-                  <div>
+                  <div className="min-w-28">
                     <div className="font-semibold">{chain.name}</div>
-                    <div className="text-sm text-white/60">
+                    <div className="text-xs text-white/60">
                       {balances?.formattedBalance || "0"} {assetSymbol}
                     </div>
                   </div>
+                </div>
+
+                <nav className="flex grow gap-2 items-center">
+                  <button
+                    onClick={() => toggleWithdraw()}
+                    className="active:scale-98 bg-linear-to-bl from-white/15 to-white/7 border border-white/10 size-8 text-xl rounded-md grid place-items-center"
+                  >
+                    <TbArrowUpRight />
+                  </button>
+
+                  <button
+                    onClick={() => toggleDeposit()}
+                    className="active:scale-98 border border-white/15 size-8 text-xl rounded-md grid place-items-center"
+                  >
+                    <TbArrowDownLeft />
+                  </button>
                 </nav>
 
-                <div className="font-bold">
+                <div className="font-bold text-right">
                   ${localizeNumber(balances?.usdValue || 0)}
                 </div>
               </div>
@@ -98,7 +122,9 @@ export default function DrawerBalances() {
         </section>
 
         <div className="p-4">
-          <Button className="w-full">Back to Assets</Button>
+          <Button onClick={closeBalancesModal} className="w-full">
+            Back to Assets
+          </Button>
         </div>
       </DrawerContent>
     </Drawer>
