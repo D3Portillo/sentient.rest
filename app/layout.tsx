@@ -9,8 +9,10 @@ import DrawerWithdraw from "@/components/DrawerWithdraw"
 import SafeInsetProvider from "@/components/SafeInsetProvider"
 import ErudaProvider from "@/components/ErudaProdiver"
 
-import DrawerTopUp from "./components/DrawerTopUp"
+import DrawerTopUp from "@/components/DrawerTopUp"
+import DrawerBalances from "@/components/DrawerBalances"
 import DrawerDeposit from "@/components/DrawerDeposit"
+
 import WorldProvider from "./WorldProvider"
 import MainLayout from "./MainLayout"
 
@@ -62,6 +64,7 @@ export default function RootLayout({
             <SafeInsetProvider>
               <DrawerWithdraw />
               <DrawerDeposit />
+              <DrawerBalances />
               <DrawerTopUp />
               <MainLayout>{children}</MainLayout>
             </SafeInsetProvider>

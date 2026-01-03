@@ -9,37 +9,27 @@ import { useTokenPrices, useAccountBalances } from "@/lib/prices"
 
 import { Spinner } from "@/components/icons"
 import { localizeNumber } from "@/lib/numbers"
+import { useBalancesModal } from "@/components/DrawerBalances"
 
 import { FaCheck } from "react-icons/fa6"
 import { IoArrowBackSharp } from "react-icons/io5"
 import PageContainer from "@/app/PageContainer"
 
 export default function PageAssets() {
+  const { openModal } = useBalancesModal()
+
   const [showZeroBalances, setShowZeroBalances] = useState(false)
   const { wallet } = useSentientWallet()
 
-  const { balances } = useAccountBalances({
+  const { priceFormattedBalances } = useAccountBalances({
     evm: wallet?.evm.address,
     sol: wallet?.solana.address,
     fuel: wallet?.fuel.address,
   })
 
-  const { getTokenPrice } = useTokenPrices()
-
-  // Flatten all balances with chain info
-  const allAssets = Object.entries(balances || {}).flatMap(
-    ([chainId, chainBalances]) =>
-      chainBalances.map((balance) => ({
-        ...balance,
-        chainId,
-        usdValue:
-          getTokenPrice(balance.symbol || "") *
-          Number(balance.formattedBalance),
-      }))
-  )
-
   // Group balances by token symbol
-  const grouped = Object.groupBy(allAssets, ({ symbol }) => symbol || "")
+  const grouped = Object.groupBy(priceFormattedBalances, ({ symbol }) => symbol)
+
   const groupedWithTotals = Object.entries(grouped)
     .map(([symbol, assets = []]) => ({
       symbol,
@@ -66,7 +56,7 @@ export default function PageAssets() {
     <PageContainer>
       {/* Title */}
       <nav className="flex items-center gap-2">
-        <Link className="text-2xl py-3 active:scale-95" href="/">
+        <Link className="text-2xl active:scale-95" href="/">
           <IoArrowBackSharp />
         </Link>
         <h1 className="text-2xl font-bold">Assets</h1>
@@ -100,6 +90,7 @@ export default function PageAssets() {
           displayAssets.map((asset) => (
             <AssetRow
               key={`asset-${asset.symbol}`}
+              onSelect={() => openModal(asset.symbol as any)}
               token={getTokenBySymbol(asset.symbol as any)!}
               formattedBalance={asset.totalBalance.toFixed(4)}
               usdValue={asset.totalUsdValue}
@@ -119,13 +110,18 @@ function AssetRow({
   token,
   formattedBalance,
   usdValue,
+  onSelect,
 }: {
   token: TokenConfig
   formattedBalance: string
   usdValue: number
+  onSelect?: () => void
 }) {
   return (
-    <button className="flex items-center gap-4 p-4 pr-5 rounded-xl bg-white/5 hover:bg-white/8 transition-colors border border-white/5">
+    <button
+      onClick={onSelect}
+      className="flex items-center gap-4 p-4 pr-5 rounded-xl bg-white/5 hover:bg-white/8 transition-colors border border-white/5"
+    >
       <figure className="size-9 rounded-full overflow-hidden bg-gray-300">
         <img src={token.iconImage} className="size-full object-cover" alt="" />
       </figure>

@@ -26,7 +26,7 @@ const DEPOSIT_CHAINS = {
   OPTIMISM: {
     name: "Optimism",
     iconImage: "/chains/optimism.png",
-    rpcURL: "https://0xrpc.io/op",
+    rpcURL: "https://public-op-mainnet.fastnode.io",
     chainType: "EVM",
     chainConfig: optimism,
   },
@@ -75,7 +75,7 @@ export type TokenConfig = {
   >
 }
 
-type DepositToken = "WLD" | "USDC" | "USDT" | "SOL" | "FUEL" | "ETH"
+export type DepositToken = "WLD" | "USDC" | "USDT" | "SOL" | "FUEL" | "ETH"
 export const TOKENS: Record<DepositToken, TokenConfig> = {
   SOL: {
     symbol: "SOL",

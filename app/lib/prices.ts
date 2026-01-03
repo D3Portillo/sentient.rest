@@ -79,8 +79,28 @@ export const useAccountBalances = (opts: {
     }
   )
 
+  const { getTokenPrice } = useTokenPrices()
+  const balances = data?.balances || null
+
+  // Flatten all balances with chain info
+  const priceFormattedBalances = Object.entries(balances || {})
+    .flatMap(([chainId, chainBalances]) =>
+      chainBalances.map((balance) => {
+        const symbol = balance.symbol || ""
+        const usdPrice = symbol ? getTokenPrice(symbol) : 0
+        return {
+          ...balance,
+          symbol,
+          chainId,
+          usdValue: Number(balance.formattedBalance) * usdPrice,
+        }
+      })
+    )
+    .filter((b) => Boolean(b.symbol))
+
   return {
-    balances: data?.balances || null,
+    balances,
+    priceFormattedBalances,
     ...query,
   }
 }
