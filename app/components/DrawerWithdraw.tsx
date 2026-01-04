@@ -1,54 +1,35 @@
 "use client"
 
-import { atom, useAtom } from "jotai"
 import { useEffect, useState } from "react"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
 import Button from "./Button"
-import {
-  CHAINS_LIST,
-  CHAIN_WORLD,
-  TOKEN_WLD,
-  getTokensForChain,
-} from "@/lib/registry"
 
-const atomWithdrawModalOpen = atom(false)
-export const useWithdrawModal = () => {
-  const [open, setOpen] = useAtom(atomWithdrawModalOpen)
-  return {
-    open,
-    setOpen,
-    toggle: () => setOpen((o) => !o),
-  }
-}
+import { useComposableModalState } from "@/lib/modals"
+import { getTokensForChain, CHAINS_LIST } from "@/lib/registry"
 
+export const useWithdrawModal = () => useComposableModalState("withdrawals")
 export default function DrawerWithdraw() {
-  const { open, setOpen } = useWithdrawModal()
-  const [selectedChain, setSelectedChain] = useState(CHAIN_WORLD)
-  const [selectedToken, setSelectedToken] = useState(TOKEN_WLD)
+  const { isOpen, chain, token, setToken, setChain, close } = useWithdrawModal()
   const [amount, setAmount] = useState("")
 
   useEffect(() => {
-    if (open) {
-      // Reset to defaults on open
-      setSelectedChain(CHAIN_WORLD)
-      setSelectedToken(TOKEN_WLD)
-      setAmount("")
-    }
-  }, [open])
+    // Reset amount on open
+    if (isOpen) setAmount("")
+  }, [isOpen])
 
-  const TOKENS = getTokensForChain(selectedChain.id)
+  const TOKENS = getTokensForChain(chain.id)
 
   useEffect(() => {
     // Set to first available token for chain when not in list
     const isCurrentTokenAvialable = TOKENS.find(
-      (t) => t.symbol === selectedToken.symbol
+      (t) => t.symbol === token.symbol
     )
-    if (!isCurrentTokenAvialable) setSelectedToken(TOKENS[0])
-  }, [selectedChain.id])
+    if (!isCurrentTokenAvialable) setToken(TOKENS[0])
+  }, [chain.id])
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer open={isOpen} onOpenChange={close}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Transfer Funds</DrawerTitle>
@@ -59,36 +40,36 @@ export default function DrawerWithdraw() {
           <div>
             <label className="text-xs text-white/60 mb-2 block">Network</label>
             <Select
-              value={selectedChain.id}
+              value={chain.id}
               onValueChange={(id) => {
                 const chain = CHAINS_LIST.find((c) => c.id === id)
-                if (chain) setSelectedChain(chain)
+                if (chain) setChain(chain)
               }}
             >
               <SelectTrigger>
                 <div className="flex items-center gap-3">
                   <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                     <img
-                      src={selectedChain.iconImage}
+                      src={chain.iconImage}
                       className="size-full object-cover"
                       alt=""
                     />
                   </figure>
-                  <span className="font-semibold">{selectedChain.name}</span>
+                  <span className="font-semibold">{chain.name}</span>
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {CHAINS_LIST.map((chain) => (
-                  <SelectItem key={`chain-${chain.name}`} value={chain.id}>
+                {CHAINS_LIST.map((item) => (
+                  <SelectItem key={`chain-${item.name}`} value={item.id}>
                     <div className="flex items-center gap-3">
                       <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                         <img
-                          src={chain.iconImage}
+                          src={item.iconImage}
                           className="size-full object-cover"
                           alt=""
                         />
                       </figure>
-                      <span className="font-semibold">{chain.name}</span>
+                      <span className="font-semibold">{item.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -100,48 +81,41 @@ export default function DrawerWithdraw() {
           <div>
             <label className="text-xs text-white/60 mb-2 block">Token</label>
             <Select
-              value={selectedToken.symbol}
+              value={token.symbol}
               onValueChange={(value) => {
                 const token = TOKENS.find((t) => t.symbol === value)
-                if (token) setSelectedToken(token)
+                if (token) setToken(token)
               }}
             >
               <SelectTrigger>
                 <div className="flex items-center gap-3">
                   <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                     <img
-                      src={selectedToken.iconImage}
+                      src={token.iconImage}
                       className="size-full object-cover"
                       alt=""
                     />
                   </figure>
                   <div className="text-left -space-y-0.5">
-                    <div className="font-semibold">{selectedToken.symbol}</div>
-                    <div className="text-xs text-white/60">
-                      {selectedToken.name}
-                    </div>
+                    <div className="font-semibold">{token.symbol}</div>
+                    <div className="text-xs text-white/60">{token.name}</div>
                   </div>
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS.map((token) => (
-                  <SelectItem
-                    value={token.symbol}
-                    key={`token-${token.symbol}`}
-                  >
+                {TOKENS.map((item) => (
+                  <SelectItem key={`token-${item.symbol}`} value={item.symbol}>
                     <div className="flex items-center gap-3">
                       <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                         <img
-                          src={token.iconImage}
+                          src={item.iconImage}
                           className="size-full object-cover"
                           alt=""
                         />
                       </figure>
                       <div className="text-left -space-y-0.5">
-                        <div className="font-semibold">{token.symbol}</div>
-                        <div className="text-xs text-white/60">
-                          {token.name}
-                        </div>
+                        <div className="font-semibold">{item.symbol}</div>
+                        <div className="text-xs text-white/60">{item.name}</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -155,7 +129,7 @@ export default function DrawerWithdraw() {
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs text-white/60">Amount</label>
               <span className="text-xs text-white/60">
-                Balance: {0} {selectedToken.symbol}
+                Balance: {0} {token.symbol}
               </span>
             </div>
             <div className="relative">
@@ -175,7 +149,7 @@ export default function DrawerWithdraw() {
           <div className="mt-2 p-4 rounded-lg bg-white/5 space-y-2">
             <div className="flex justify-between text-xs">
               <span className="text-white/60">Min Transfer</span>
-              <span>0.01 {selectedToken.symbol}</span>
+              <span>0.01 {token.symbol}</span>
             </div>
 
             <div className="flex justify-between text-xs">

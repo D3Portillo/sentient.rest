@@ -1,42 +1,27 @@
 "use client"
 
-import { atom, useAtom } from "jotai"
 import { useEffect, useState } from "react"
 import QRCode from "react-qr-code"
 
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 import { Select, SelectContent, SelectItem, SelectTrigger } from "./ui/select"
 import { useSentientWallet } from "@/lib/wallets"
+import { useComposableModalState } from "@/lib/modals"
 
-import {
-  CHAIN_WORLD,
-  CHAINS_LIST,
-  TOKEN_WLD,
-  getTokensForChain,
-} from "@/lib/registry"
+import { CHAINS_LIST, getTokensForChain } from "@/lib/registry"
 import { IoCopy, IoCheckmark } from "react-icons/io5"
 
 import Button from "./Button"
 
-const atomDepositModalOpen = atom(false)
-export const useDepositModal = () => {
-  const [open, setOpen] = useAtom(atomDepositModalOpen)
-  return {
-    open,
-    setOpen,
-    toggle: () => setOpen((o) => !o),
-  }
-}
-
+export const useDepositModal = () => useComposableModalState("deposits")
 export default function DrawerDeposit() {
-  const { open, setOpen } = useDepositModal()
+  const { isOpen, chain, token, setToken, setChain, close } = useDepositModal()
+
   const { wallet } = useSentientWallet()
-  const [selectedChain, setSelectedChain] = useState(CHAIN_WORLD)
-  const [selectedToken, setSelectedToken] = useState(TOKEN_WLD)
   const [copied, setCopied] = useState(false)
 
-  const isSolana = selectedChain.name.toLowerCase().includes("solana")
-  const isFuel = selectedChain.name.toLowerCase().includes("fuel")
+  const isSolana = chain.name.toLowerCase().includes("solana")
+  const isFuel = chain.name.toLowerCase().includes("fuel")
 
   const depositAddress = isFuel
     ? wallet?.fuel.address
@@ -51,26 +36,18 @@ export default function DrawerDeposit() {
     setTimeout(() => setCopied(false), 2000)
   }
 
-  useEffect(() => {
-    if (open) {
-      // Reset to defaults on open
-      setSelectedChain(CHAIN_WORLD)
-      setSelectedToken(TOKEN_WLD)
-    }
-  }, [open])
-
-  const TOKENS = getTokensForChain(selectedChain.id)
+  const TOKENS = getTokensForChain(chain.id)
 
   useEffect(() => {
     // Set to first available token for chain when not in list
     const isCurrentTokenAvialable = TOKENS.find(
-      (t) => t.symbol === selectedToken.symbol
+      (t) => t.symbol === token.symbol
     )
-    if (!isCurrentTokenAvialable) setSelectedToken(TOKENS[0])
-  }, [selectedChain.id])
+    if (!isCurrentTokenAvialable) setToken(TOKENS[0])
+  }, [chain.id])
 
   return (
-    <Drawer open={open} onOpenChange={setOpen}>
+    <Drawer open={isOpen} onOpenChange={close}>
       <DrawerContent className="max-w-md h-[calc(100dvh-3rem-var(--spacing-safe-bottom))] mx-auto border-white/10">
         <DrawerHeader className="pb-6">
           <DrawerTitle>Deposit Funds</DrawerTitle>
@@ -81,36 +58,36 @@ export default function DrawerDeposit() {
           <div>
             <label className="text-xs text-white/60 mb-2 block">Network</label>
             <Select
-              value={selectedChain.id}
+              value={chain.id}
               onValueChange={(id) => {
                 const chain = CHAINS_LIST.find((c) => c.id === id)
-                if (chain) setSelectedChain(chain)
+                if (chain) setChain(chain)
               }}
             >
               <SelectTrigger>
                 <div className="flex items-center gap-3">
                   <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                     <img
-                      src={selectedChain.iconImage}
+                      src={chain.iconImage}
                       className="size-full object-cover"
                       alt=""
                     />
                   </figure>
-                  <span className="font-semibold">{selectedChain.name}</span>
+                  <span className="font-semibold">{chain.name}</span>
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {CHAINS_LIST.map((chain) => (
-                  <SelectItem key={`chain-${chain.name}`} value={chain.id}>
+                {CHAINS_LIST.map((item) => (
+                  <SelectItem key={`d-chain-${item.name}`} value={item.id}>
                     <div className="flex items-center gap-3">
                       <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                         <img
-                          src={chain.iconImage}
+                          src={item.iconImage}
                           className="size-full object-cover"
                           alt=""
                         />
                       </figure>
-                      <span className="font-semibold">{chain.name}</span>
+                      <span className="font-semibold">{item.name}</span>
                     </div>
                   </SelectItem>
                 ))}
@@ -122,48 +99,44 @@ export default function DrawerDeposit() {
           <div>
             <label className="text-xs text-white/60 mb-2 block">Token</label>
             <Select
-              value={selectedToken.symbol}
+              value={token.symbol}
               onValueChange={(value) => {
                 const token = TOKENS.find((t) => t.symbol === value)
-                if (token) setSelectedToken(token)
+                if (token) setToken(token)
               }}
             >
               <SelectTrigger>
                 <div className="flex items-center gap-3">
                   <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                     <img
-                      src={selectedToken.iconImage}
+                      src={token.iconImage}
                       className="size-full object-cover"
                       alt=""
                     />
                   </figure>
                   <div className="text-left -space-y-0.5">
-                    <div className="font-semibold">{selectedToken.symbol}</div>
-                    <div className="text-xs text-white/60">
-                      {selectedToken.name}
-                    </div>
+                    <div className="font-semibold">{token.symbol}</div>
+                    <div className="text-xs text-white/60">{token.name}</div>
                   </div>
                 </div>
               </SelectTrigger>
               <SelectContent>
-                {TOKENS.map((token) => (
+                {TOKENS.map((item) => (
                   <SelectItem
-                    value={token.symbol}
-                    key={`token-${token.symbol}`}
+                    value={item.symbol}
+                    key={`d-token-${item.symbol}`}
                   >
                     <div className="flex items-center gap-3">
                       <figure className="size-6 bg-white/15 rounded-full overflow-hidden">
                         <img
-                          src={token.iconImage}
+                          src={item.iconImage}
                           className="size-full object-cover"
                           alt=""
                         />
                       </figure>
                       <div className="text-left -space-y-0.5">
-                        <div className="font-semibold">{token.symbol}</div>
-                        <div className="text-xs text-white/60">
-                          {token.name}
-                        </div>
+                        <div className="font-semibold">{item.symbol}</div>
+                        <div className="text-xs text-white/60">{item.name}</div>
                       </div>
                     </div>
                   </SelectItem>
@@ -193,7 +166,7 @@ export default function DrawerDeposit() {
                 {depositAddress && (
                   <figure className="absolute z-1 size-9 border-2 border-white bg-white/90 backdrop-blur overflow-hidden rounded-full top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
                     <img
-                      src={selectedChain.iconImage}
+                      src={chain.iconImage}
                       className="size-full object-cover"
                       alt=""
                     />
@@ -213,7 +186,7 @@ export default function DrawerDeposit() {
 
             <div className="flex justify-between text-xs">
               <span className="text-white/60">Min Deposit</span>
-              <span>0.01 {selectedToken.symbol}</span>
+              <span>0.01 {token.symbol}</span>
             </div>
 
             <div className="flex justify-between text-xs">

@@ -16,7 +16,7 @@ import { useSentientWallet } from "@/lib/wallets"
 import PageSignin from "./PageSignin"
 
 export default function MainLayout({ children }: PropsWithChildren) {
-  const { toggle: toggleWithdraw } = useWithdrawModal()
+  const { show: showWithdrawModal } = useWithdrawModal()
   const { isConnected } = useWorldAuth()
   const { wallet } = useSentientWallet()
 
@@ -46,7 +46,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
           </NavItem>
 
           <button
-            onClick={toggleWithdraw}
+            onClick={() => showWithdrawModal()}
             className="flex drop-shadow-[0_0_20px_rgba(255,255,0,0.5)] -top-2 flex-col items-center gap-1 relative"
           >
             <div className="size-12 -top-1 bg-sw-yellow text-black rounded-full flex items-center justify-center absolute">

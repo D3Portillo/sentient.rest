@@ -59,6 +59,7 @@ export const CHAINS_LIST = Object.entries(DEPOSIT_CHAINS).map(
 
 export const CHAIN_WORLD = CHAINS_LIST[0]
 
+export type ChainConfig = typeof CHAIN_WORLD
 export type TokenConfig = {
   symbol: string
   name: string

@@ -3,7 +3,11 @@
 import { atom, useAtom } from "jotai"
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle } from "./ui/drawer"
 
-import { type DepositToken, getChainsForToken } from "@/lib/registry"
+import {
+  type DepositToken,
+  getChainsForToken,
+  getTokenBySymbol,
+} from "@/lib/registry"
 import { cn } from "@/lib/utils"
 import { localizeNumber } from "@/lib/numbers"
 import { useAccountBalances } from "@/lib/prices"
@@ -33,8 +37,8 @@ export const useBalancesModal = () => {
 export default function DrawerBalances() {
   const { wallet } = useSentientWallet()
 
-  const { toggle: toggleWithdraw } = useWithdrawModal()
-  const { toggle: toggleDeposit } = useDepositModal()
+  const { show: showWithdrawModal } = useWithdrawModal()
+  const { show: showDepositModal } = useDepositModal()
 
   const { isOpen, close: closeBalancesModal, assetSymbol } = useBalancesModal()
   const { priceFormattedBalances } = useAccountBalances({
@@ -71,6 +75,8 @@ export default function DrawerBalances() {
 
         <section className="mt-2 px-2 grow">
           {chainsWithBalances.map(({ balances, ...chain }) => {
+            const TOKEN_CONFIG = getTokenBySymbol(assetSymbol!) || undefined
+
             return (
               <div
                 key={`balance-by-chain-${chain.id}`}
@@ -99,14 +105,24 @@ export default function DrawerBalances() {
 
                 <nav className="flex grow gap-2 items-center">
                   <button
-                    onClick={() => toggleWithdraw()}
+                    onClick={() =>
+                      showWithdrawModal({
+                        chain,
+                        token: TOKEN_CONFIG,
+                      })
+                    }
                     className="active:scale-98 bg-linear-to-bl from-white/15 to-white/7 border border-white/10 size-8 text-xl rounded-md grid place-items-center"
                   >
                     <TbArrowUpRight />
                   </button>
 
                   <button
-                    onClick={() => toggleDeposit()}
+                    onClick={() =>
+                      showDepositModal({
+                        chain,
+                        token: TOKEN_CONFIG,
+                      })
+                    }
                     className="active:scale-98 border border-white/15 size-8 text-xl rounded-md grid place-items-center"
                   >
                     <TbArrowDownLeft />

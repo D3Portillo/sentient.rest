@@ -19,8 +19,8 @@ import PageContainer from "./PageContainer"
 import Link from "next/link"
 
 export default function Home() {
-  const { toggle: toggleWithdraw } = useWithdrawModal()
-  const { toggle: toggleDeposit } = useDepositModal()
+  const { show: showWithdrawModal } = useWithdrawModal()
+  const { show: showDepositModal } = useDepositModal()
   const { toggle: toggleTopUp } = useTopUpModal()
 
   const { wallet } = useSentientWallet()
@@ -71,7 +71,7 @@ export default function Home() {
         {/* Action Buttons */}
         <div className="grid mt-18 grid-cols-4 gap-2 w-full max-w-sm">
           <button
-            onClick={toggleWithdraw}
+            onClick={() => showWithdrawModal()}
             className="bg-sw-yellow text-black backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center"
           >
             <figure className="size-9 grid place-items-center">
@@ -81,7 +81,7 @@ export default function Home() {
           </button>
 
           <button
-            onClick={toggleDeposit}
+            onClick={() => showDepositModal()}
             className="bg-white/10 backdrop-blur-sm rounded-xl p-3 gap-1 flex flex-col items-center justify-center hover:bg-white/15 transition-colors"
           >
             <figure className="size-9 grid place-items-center">
