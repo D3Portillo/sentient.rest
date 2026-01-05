@@ -9,7 +9,6 @@ import { FaArrowsRotate } from "react-icons/fa6"
 import { useWithdrawModal } from "@/components/DrawerWithdraw"
 import { useTopUpModal } from "@/components/DrawerTopUp"
 import { useDepositModal } from "@/components/DrawerDeposit"
-import { useSentientWallet } from "@/lib/wallets"
 import { useTokenPrices, useAccountBalances } from "@/lib/prices"
 
 import { localizeNumber } from "@/lib/numbers"
@@ -23,13 +22,7 @@ export default function Home() {
   const { show: showDepositModal } = useDepositModal()
   const { toggle: toggleTopUp } = useTopUpModal()
 
-  const { wallet } = useSentientWallet()
-
-  const { balances } = useAccountBalances({
-    evm: wallet?.evm.address,
-    sol: wallet?.solana.address,
-    fuel: wallet?.fuel.address,
-  })
+  const { balances } = useAccountBalances()
 
   const { getTokenPrice } = useTokenPrices()
 

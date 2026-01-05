@@ -7,11 +7,14 @@ import Button from "./Button"
 
 import { useComposableModalState } from "@/lib/modals"
 import { getTokensForChain, CHAINS_LIST } from "@/lib/registry"
+import { useAccountBalances } from "../lib/prices"
 
 export const useWithdrawModal = () => useComposableModalState("withdrawals")
 export default function DrawerWithdraw() {
   const { isOpen, chain, token, setToken, setChain, close } = useWithdrawModal()
   const [amount, setAmount] = useState("")
+
+  const { balances } = useAccountBalances()
 
   useEffect(() => {
     // Reset amount on open
@@ -27,6 +30,10 @@ export default function DrawerWithdraw() {
     )
     if (!isCurrentTokenAvialable) setToken(TOKENS[0])
   }, [chain.id])
+
+  const BALANCE =
+    balances?.[chain.id]?.find((t) => t.symbol === token.symbol)
+      ?.formattedBalance || "0"
 
   return (
     <Drawer open={isOpen} onOpenChange={close}>
@@ -129,7 +136,7 @@ export default function DrawerWithdraw() {
             <div className="flex justify-between items-center mb-2">
               <label className="text-xs text-white/60">Amount</label>
               <span className="text-xs text-white/60">
-                Balance: {0} {token.symbol}
+                Balance: {BALANCE} {token.symbol}
               </span>
             </div>
             <div className="relative">

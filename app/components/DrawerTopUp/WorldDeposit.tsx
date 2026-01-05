@@ -6,7 +6,7 @@ import { worldchain } from "viem/chains"
 import useSWR from "swr"
 
 import { useSentientWallet } from "@/lib/wallets"
-import { CHAIN_WORLD, getTokensForChain, TOKEN_USDC } from "@/app/lib/registry"
+import { CHAIN_WORLD, TOKEN_USDC, TOKEN_WLD } from "@/app/lib/registry"
 import {
   Select,
   SelectContent,
@@ -19,17 +19,23 @@ import { fetchTokenBalances } from "@/lib/balances"
 import { localizeNumber } from "@/lib/numbers"
 import { executePayment } from "@/lib/payments"
 
+const DEPOSIT_TOKENS = [TOKEN_WLD, TOKEN_USDC].map(
+  ({ chains, ...tokenConfig }) => {
+    const chainData = chains.WORLD!
+    return {
+      ...chainData,
+      ...tokenConfig,
+      chains,
+    }
+  }
+)
+
 export default function WorldDeposit({ initialAmount = "" }) {
   const { address, signIn } = useWorldAuth()
 
   const [selectedToken, setSelectedToken] = useState(TOKEN_USDC)
   const [amount, setAmount] = useState("")
   const { wallet } = useSentientWallet()
-
-  const TOKENS = getTokensForChain(CHAIN_WORLD.id).filter((t) =>
-    // Only show WLD and USDC for World deposits
-    ["WLD", "USDC"].includes(t.symbol)
-  )
 
   useEffect(() => {
     // Sync to initial amount prop (for presetting from top-up flow)
@@ -38,27 +44,17 @@ export default function WorldDeposit({ initialAmount = "" }) {
   }, [initialAmount])
 
   const { data: balances = null } = useSWR(
-    address ? `balances-usdc-wld-${address}` : null,
+    address ? `world-app-balance-in-usdc-wld-${address}` : null,
     async () => {
       if (!address) return null
-      const balances = await fetchTokenBalances(
+      const [WLD = null, USDC = null] = await fetchTokenBalances(
         {
-          chainType: CHAIN_WORLD.chainType,
-          rpcURL: CHAIN_WORLD.rpcURL,
+          ...CHAIN_WORLD,
           chainConfig: worldchain,
         },
         address,
-        TOKENS.map(({ symbol, chains }) => {
-          const chainData = (chains as any)[CHAIN_WORLD.id]
-          return {
-            ...chainData,
-            symbol,
-          }
-        })
+        DEPOSIT_TOKENS
       )
-
-      const USDC = balances.find((b) => b.symbol === "USDC") || null
-      const WLD = balances.find((b) => b.symbol === "WLD") || null
 
       return {
         USDC,
@@ -104,7 +100,7 @@ export default function WorldDeposit({ initialAmount = "" }) {
           <Select
             value={selectedToken.symbol}
             onValueChange={(value) => {
-              const token = TOKENS.find((t) => t.symbol === value)
+              const token = DEPOSIT_TOKENS.find((t) => t.symbol === value)
               if (token) setSelectedToken(token)
             }}
           >
@@ -126,7 +122,7 @@ export default function WorldDeposit({ initialAmount = "" }) {
               </div>
             </SelectTrigger>
             <SelectContent>
-              {TOKENS.map((token) => (
+              {DEPOSIT_TOKENS.map((token) => (
                 <SelectItem value={token.symbol} key={`token-${token.symbol}`}>
                   <div className="flex items-center gap-3">
                     <figure className="size-6 bg-white/15 rounded-full overflow-hidden">

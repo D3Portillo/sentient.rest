@@ -4,8 +4,7 @@ import Link from "next/link"
 import { useState } from "react"
 
 import { getTokenBySymbol, type TokenConfig } from "@/lib/registry"
-import { useSentientWallet } from "@/lib/wallets"
-import { useTokenPrices, useAccountBalances } from "@/lib/prices"
+import { useAccountBalances } from "@/lib/prices"
 
 import { Spinner } from "@/components/icons"
 import { localizeNumber } from "@/lib/numbers"
@@ -18,14 +17,8 @@ import PageContainer from "@/app/PageContainer"
 export default function PageAssets() {
   const { openModal } = useBalancesModal()
 
+  const { priceFormattedBalances } = useAccountBalances()
   const [showZeroBalances, setShowZeroBalances] = useState(false)
-  const { wallet } = useSentientWallet()
-
-  const { priceFormattedBalances } = useAccountBalances({
-    evm: wallet?.evm.address,
-    sol: wallet?.solana.address,
-    fuel: wallet?.fuel.address,
-  })
 
   // Group balances by token symbol
   const grouped = Object.groupBy(priceFormattedBalances, ({ symbol }) => symbol)

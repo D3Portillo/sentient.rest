@@ -11,7 +11,6 @@ import {
 import { cn } from "@/lib/utils"
 import { localizeNumber } from "@/lib/numbers"
 import { useAccountBalances } from "@/lib/prices"
-import { useSentientWallet } from "@/lib/wallets"
 
 import { TbArrowUpRight, TbArrowDownLeft } from "react-icons/tb"
 
@@ -35,17 +34,11 @@ export const useBalancesModal = () => {
 }
 
 export default function DrawerBalances() {
-  const { wallet } = useSentientWallet()
-
   const { show: showWithdrawModal } = useWithdrawModal()
   const { show: showDepositModal } = useDepositModal()
 
   const { isOpen, close: closeBalancesModal, assetSymbol } = useBalancesModal()
-  const { priceFormattedBalances } = useAccountBalances({
-    evm: wallet?.evm.address,
-    sol: wallet?.solana.address,
-    fuel: wallet?.fuel.address,
-  })
+  const { priceFormattedBalances } = useAccountBalances()
 
   const chainsForToken = assetSymbol ? getChainsForToken(assetSymbol) : []
 

@@ -15,6 +15,7 @@ import {
 } from "@/components/ui/drawer"
 import Button from "@/components/Button"
 
+import { Spinner } from "@/components/icons"
 import { useSentientWallet } from "@/lib/wallets"
 import { getMiniAppActionLink } from "@/lib/world"
 import { localizeNumber } from "@/lib/numbers"
@@ -213,8 +214,8 @@ export default function DrawerTopUp() {
           {step === "provider" &&
             (method === "card" ? (
               isLoading ? (
-                <div className="text-center grow grid place-items-center text-sm text-white/60">
-                  <p>Loading...</p>
+                <div className="grow grid place-items-center">
+                  <Spinner />
                 </div>
               ) : (
                 <div className="flex -mx-4 px-4 flex-col gap-2 flex-1 overflow-auto">
