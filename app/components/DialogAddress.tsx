@@ -15,7 +15,7 @@ import Button from "./Button"
 export default function DialogAddress() {
   const { address, signOut } = useWorldAuth()
   const { profile } = useWorldProfile(address)
-  const { toggle: showDepositModal } = useDepositModal()
+  const { show: showDepositModal } = useDepositModal()
 
   const USERNAME =
     profile?.username ||
@@ -49,7 +49,7 @@ export default function DialogAddress() {
           </Button>
 
           <Button
-            onClick={showDepositModal}
+            onClick={() => showDepositModal()}
             className="bg-white outline-2 outline-white/20 px-6 hover:bg-white/95"
           >
             <span className="grow text-left">Deposit</span>
